@@ -10,7 +10,7 @@
 - `data/books.json` — `scripts/import.js`가 CSV를 검사·정리해 만든 결과. 직접 고치지 않는다.
 - `data/vocab.json` — 대상 학년 5단계와 주제 키워드 18개. 여기 없는 값은 import에서 오류가 난다.
 - `data/covers/<ID>.jpg` — 표지 원본. 파일 이름이 책 ID와 같아야 한다.
-- `sites/<slug>.json` — 서가별 설정(작가 이름, 색 `color`(orange 임지형 / green 김민성), 배경 큰 글자 `kan`, 첫 화면 제목 앞말 `role`(예: 동화 작가), 첫 화면 한 줄 `tagline`, 진열대에 올릴 최근 권수 `recentCount`, 작가 화면 내용 `about`, 배포 주소 `url`(없으면 카톡 미리보기 그림 태그가 빠진다. 임지형은 2026-11-08에 넣음) 등). `draft: true`면 전체 빌드에서 빠진다.
+- `sites/<slug>.json` — 서가별 설정(작가 이름, 색 `color`(orange 임지형 / green 김민성), 배경 큰 글자 `kan`, 첫 화면 제목 앞말 `role`(예: 동화 작가), 첫 화면 한 줄 `tagline`, 진열대에 올릴 최근 권수 `recentCount`, 작가 화면 내용 `about`, 배포 주소 `url`(없으면 카톡 미리보기 그림 태그가 빠진다. 임지형은 https://limjh.kr/) 등). `draft: true`면 전체 빌드에서 빠진다.
 - `data/channel.json` — 부부작당 채널 주소, 새 책 소식(스티비) 주소, 머리줄 작가 탭 순서.
 - `data/media/<slug>/` — 작가 사진 원본(빌드 때 webp로 줄인다).
 - `src/fonts/` — 페이퍼로지, 부크크 명조. 부크크 명조는 빌드 때 그 서가에 나오는 글자만 남긴다(`subset-font`).
@@ -20,6 +20,10 @@
 - `dist/` — 빌드 결과(자동 생성, 커밋하지 않음). `.github/workflows/deploy.yml`이 GitHub Pages로 배포한다.
 - 저장소: https://github.com/gloryfactory-hash/bookshelf (공개, 2026-11-08). 사이트: https://gloryfactory-hash.github.io/bookshelf/limjihyung/
   - `main`에 올리면 Actions가 import → build → Pages 배포를 한다. 배포(올리기)는 사용자가 하라고 할 때만 한다.
+- 임지형 서가 대표 주소: **https://limjh.kr/** (2026-11-08부터. 그 전에는 노션 페이지로 넘겨주던 주소). 도메인은 가비아에서 샀고 DNS는 Cloudflare(계정 gloryfactory@gmail.com, 존 limjh.kr).
+  - Cloudflare Pages 프로젝트 `limjh`(limjh.pages.dev)에 `dist/limjihyung`을 직접 올린다. limjh.kr·www.limjh.kr은 이 프로젝트에 붙어 있다(DNS CNAME → limjh.pages.dev, 주황 구름).
+  - 노션으로 넘겨주던 Cloudflare 넘겨주기 규칙(Rules → Redirect Rules, 'default' 안의 규칙)은 지우지 않고 꺼 두었다. 다시 켜면 노션으로 돌아간다(그때는 DNS도 되돌려야 한다).
+  - **올릴 때는 둘 다:** GitHub에 올리기(github.io도 계속 열리게) + 사용자 터미널에서 `node scripts/build.js limjihyung && npx --yes wrangler@4 pages deploy dist/limjihyung --project-name limjh --branch main --commit-dirty=true` (wrangler 로그인이 사용자 터미널에 있다). 카톡 미리보기 태그의 주소는 `sites/limjihyung.json`의 `url`(https://limjh.kr/)이라 github.io에서 열어도 대표 주소는 limjh.kr로 잡힌다.
   - 공개 저장소라 `회의록.md`, `시안/`, `.claude/`, `.impeccable/`은 올리지 않는다(.gitignore). 커밋 작성자 메일은 깃허브 공개용 주소(`282479204+gloryfactory-hash@users.noreply.github.com`, 이 폴더의 git 설정)를 쓴다.
 
 ## 명령

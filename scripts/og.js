@@ -1,6 +1,6 @@
 // 카카오톡 등에 링크를 붙였을 때 뜨는 미리보기 그림(1200×630)을 만든다. 2026-11-08 (시안 시안/address_v1 가안)
 //   data/og/<slug>/<ISBN>.jpg  책마다 하나 (ISBN이 없으면 <ID>.jpg)
-//   data/og/<slug>/site.jpg    서가 첫 화면용. 신간 표지를 쓴다(진열대 가운데 책과 같은 규칙)
+//   data/og/<slug>/site.jpg    서가 첫 화면용. sites/*.json의 shareBook(ISBN 또는 ID)이 있으면 그 책, 없으면 신간(진열대 가운데 책과 같은 규칙)
 // 배포(GitHub Actions)에는 브라우저가 없어서, 표지처럼 여기서 만들어 data/og에 넣어 두고 build는 복사만 한다.
 // 바뀐 책만 다시 찍는다(그림에 들어가는 글·표지·디자인이 같으면 건너뜀).
 //
@@ -22,8 +22,8 @@ const CH = JSON.parse(fs.readFileSync(P('data', 'channel.json'), 'utf8'));
 const LABEL = Object.fromEntries(vocab.targets.map(t => [t.name, t.label]));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const sha = s => crypto.createHash('sha1').update(s).digest('hex').slice(0, 12);
-// 진열대 가운데 책과 같은 순서 (src/app.js newestFirst)
-export const newestFirst = (a, b) => b.y - a.y || a.title.localeCompare(b.title, 'ko');
+import { newestFirst, shareBookOf } from './share.js';
+export { newestFirst };
 
 // 색은 채널 이름표 색. 바탕은 서가와 같은 회녹색 종이(#EDF0EE). 크림색은 쓰지 않는다.
 const COLOR = { orange: { me: '#b8703f', accent: '#93542A' }, green: { me: '#3d7f5c', accent: '#2F6B4C' } };
@@ -77,7 +77,7 @@ for (const site of sites) {
   const metaF = path.join(dir, 'og-meta.json');
   const old = fs.existsSync(metaF) ? JSON.parse(fs.readFileSync(metaF, 'utf8')) : {};
   const meta = {};
-  const jobs = [[list.slice().sort(newestFirst)[0], true, 'site.jpg'], ...list.map(b => [b, false, (b.isbn || b.id) + '.jpg'])];
+  const jobs = [[shareBookOf(site, list), true, 'site.jpg'], ...list.map(b => [b, false, (b.isbn || b.id) + '.jpg'])];
   for (const [b, isSite, file] of jobs) {
     const html = cardHtml(site, list, b, isSite);
     const key = sha(html + fs.statSync(P('data', 'covers', b.cover)).size + ':' + fs.statSync(P('data', 'covers', b.cover)).mtimeMs);
@@ -97,7 +97,7 @@ for (const site of sites) {
   // 목록에서 빠진 책의 그림은 지운다
   for (const f of fs.readdirSync(dir)) if (f.endsWith('.jpg') && !meta[f]) { fs.rmSync(path.join(dir, f)); console.log(`[${site.slug}] 지움: ${f}`); }
   fs.writeFileSync(metaF, JSON.stringify(meta, null, 1) + '\n');
-  console.log(`[${site.slug}] 미리보기 그림 ${jobs.length}장 → data/og/${site.slug}/ (신간: ${jobs[0][0].title})`);
+  console.log(`[${site.slug}] 미리보기 그림 ${jobs.length}장 → data/og/${site.slug}/ (서가 미리보기: ${jobs[0][0].title})`);
 }
 if (browser) await browser.close();
 fs.rmSync(tmp, { force: true });

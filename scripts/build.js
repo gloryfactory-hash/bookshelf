@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import subsetFont from 'subset-font';
 import { sheetSvg, sweatSvg, heartSvg, FW, FH, ORDER } from './sprite.js';
+import { shareBookOf } from './share.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => path.join(root, ...p);
@@ -102,6 +103,45 @@ function aboutHtml(site, list, photo) {
 </section>`;
 }
 
+// ---------- 검색엔진용 (2026-11-08, 사용자 "1번 해") ----------
+// 책 페이지는 화면을 자바스크립트가 그리지만, 검색엔진(특히 네이버)이 읽도록 상세 칸에 같은 내용을 글자로 미리 채워 둔다.
+// 화면 모습은 그대로다: 상세 칸은 숨긴 채로 두고, app.js가 열 때 같은 자리를 다시 채운다(fillDetail).
+const AGE = Object.fromEntries(vocab.targets.map(t => [t.name, t.label]));
+function staticDetail(h, b) {
+  const fill = (open, inner) => { if (!h.includes(open + '</')) throw new Error('상세 칸 자리를 못 찾음: ' + open); h = h.replace(open + '</', () => open + inner + '</'); };
+  fill('<span class="dsub" id="dSub">', esc(b.tgt + ' / ' + b.cat + (b.series ? ' / ' + b.series + ' 시리즈' : '')));
+  fill('<h2 class="dtitle" id="dTitle">', esc(b.title));
+  fill('<p class="done" id="dOne">', esc(b.one));
+  fill('<div class="dkw" id="dKw">', b.kw.map(k => `<span>${esc(k)}</span>`).join(''));
+  fill('<p class="dsyn" id="dSyn">', esc(b.desc));
+  if (b.rec.length) fill('<div class="drec" id="dRec">', '<h3>추천·선정</h3><ul>' + b.rec.map(r => `<li>${esc(r)}</li>`).join('') + '</ul>');
+  const age = AGE[b.tgt], rows = [['지은이', b.authors.join(', ')], ['대상', b.tgt + (age && age !== b.tgt ? ` (${age})` : '')]];
+  if (b.cat && b.cat !== '일반' && b.cat !== b.tgt) rows.push(['분류', b.cat]);
+  rows.push(['출간', b.ed ? `${b.y}년 첫 출간, ${b.ed}년 개정판` : `${b.y}년`]);
+  if (b.pages) rows.push(['쪽수', b.pages + '쪽']);
+  rows.push(['출판사', b.pub]); if (b.isbn) rows.push(['ISBN', b.isbn]);
+  fill('<div class="dbib" id="dBib">', '<h3>도서 정보</h3><dl>' + rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>');
+  const shops = [['yes24', 'YES24'], ['kyobo', '교보문고'], ['aladin', '알라딘']].filter(([k]) => /^https:\/\//.test(b.links[k] || ''));
+  if (shops.length) fill('<div class="dbuy" id="dBuy">', '<h3>서점에서 보기</h3><div class="shops">' + shops.map(([k, l]) => `<a href="${esc(b.links[k])}" target="_blank" rel="noopener">${esc(l)}</a>`).join('') + '</div>');
+  return h;
+}
+// 책 정보 구조화 데이터(schema.org Book). 검색 결과에 책 정보로 보이게 돕는다.
+const bookLd = (b, URL0, key, hasImg) => '<script type="application/ld+json">' + safeJson({
+  '@context': 'https://schema.org', '@type': 'Book', name: b.title, url: URL0 + key + '/',
+  author: b.authors.map(n => ({ '@type': 'Person', name: n })), inLanguage: 'ko', genre: b.cat,
+  audience: { '@type': 'Audience', audienceType: b.tgt + (AGE[b.tgt] && AGE[b.tgt] !== b.tgt ? ` (${AGE[b.tgt]})` : '') },
+  keywords: b.kw.join(', '), description: b.desc, datePublished: String(b.y),
+  ...(b.isbn ? { isbn: b.isbn } : {}), ...(b.pages ? { numberOfPages: b.pages } : {}),
+  publisher: { '@type': 'Organization', name: b.pub }, ...(hasImg ? { image: URL0 + 'og/' + key + '.jpg' } : {}),
+}) + '</script>';
+// 없는 주소 화면. Cloudflare Pages는 404.html이 없으면 아무 주소에나 첫 화면을 200으로 보내(검색엔진에는 같은 페이지가 끝없이 보임) 따로 둔다.
+const notFound = (title, links) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>페이지를 찾을 수 없어요 · ${esc(title)}</title>
+<style>:root{--p:#EDF0EE;--i:#1E2421;--m:#5E6661;--a:#93542A;color-scheme:light}@media (prefers-color-scheme:dark){:root{--p:#171B19;--i:#E9ECE9;--m:#A2AAA5;--a:#E0A274;color-scheme:dark}}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--p);color:var(--i);font-family:'Pretendard',system-ui,sans-serif;padding:24px;box-sizing:border-box}
+main{max-width:420px}h1{margin:0 0 12px;font-size:22px;color:var(--a)}p{margin:0 0 24px;line-height:1.6;color:var(--m)}
+a{display:inline-flex;align-items:center;height:44px;padding:0 18px;border:1px solid var(--a);background:var(--a);color:var(--p);font-weight:700;text-decoration:none;margin:0 8px 8px 0}</style></head>
+<body><main><h1>이 주소에는 페이지가 없어요</h1><p>주소가 바뀌었거나 잘못 입력되었을 수 있어요.</p>${links.map(([h, t]) => `<a href="${esc(h)}">${esc(t)}</a>`).join('')}</main></body></html>`;
+
 const sites = fs.readdirSync(P('sites')).filter(f => f.endsWith('.json')).map(f => JSON.parse(fs.readFileSync(P('sites', f), 'utf8')));
 const built = [];
 for (const site of sites) {
@@ -167,26 +207,39 @@ for (const site of sites) {
     `<meta property="og:title" content="${esc(title)}">`,
     `<meta property="og:description" content="${esc(desc)}">`,
     ...(URL0 ? [`<meta property="og:url" content="${esc(URL0 + pagePath)}">`, `<link rel="canonical" href="${esc(URL0 + pagePath)}">`] : []),
-    ...(URL0 && hasOg(img) ? [`<meta property="og:image" content="${esc(URL0 + 'og/' + img)}?v=${VER}">`, '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">', '<meta name="twitter:card" content="summary_large_image">'] : [])
+    // 그림 주소 끝 ?v=는 그림 내용으로 정한다: 그림만 바뀌어도(예: 서가 미리보기 책을 바꿈) 카톡이 새 그림을 가져가게
+    ...(URL0 && hasOg(img) ? [`<meta property="og:image" content="${esc(URL0 + 'og/' + img)}?v=${crypto.createHash('sha1').update(fs.readFileSync(path.join(ogOut, img))).digest('hex').slice(0, 8)}">`, '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">', '<meta name="twitter:card" content="summary_large_image">'] : [])
   ].join('\n');
   const noPh = h => { if (/\{\{[A-Z_]+\}\}/.test(h)) throw new Error('채워지지 않은 자리표시자가 있습니다: ' + h.match(/\{\{[A-Z_]+\}\}/)[0]); return h; };
-  const newest = list.slice().sort((a, b) => b.y - a.y || a.title.localeCompare(b.title, 'ko'))[0];
+  const newest = shareBookOf(site, list); // 서가 미리보기 설명의 '신간 『…』'. shareBook이 있으면 그 책(scripts/og.js와 같은 규칙)
   const siteDesc = site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`;
   fs.writeFileSync(path.join(out, 'index.html'), noPh(html
     .replace('{{BASE}}', '<base href="./">') // 기준 주소를 처음에 고정한다. 서가 안에서 책 주소로 옮겨 가도 표지·글꼴 경로가 서가 뿌리 기준으로 남는다
-    .replace('{{OG}}', () => ogTags({ type: 'website', title: `${site.role ? site.role + ' ' : ''}${site.author} · ${site.brandSub || '작품 서가'}`, desc: `신간 『${newest.title}』 · ${siteDesc}`, pagePath: '', img: 'site.jpg' }))));
+    .replace('{{OG}}', () => ogTags({ type: 'website', title: `${site.role ? site.role + ' ' : ''}${site.author} · ${site.brandSub || '작품 서가'}`, desc: `신간 『${newest.title}』 · ${siteDesc}`, pagePath: '', img: 'site.jpg' }) +
+      (URL0 ? '\n<script type="application/ld+json">' + safeJson({ '@context': 'https://schema.org', '@type': 'WebSite', name: site.title, url: URL0, inLanguage: 'ko', description: siteDesc,
+        about: { '@type': 'Person', name: site.author, ...(site.role ? { jobTitle: site.role } : {}) } }) + '</script>' : ''))
+    // 자바스크립트 없이 읽는 검색엔진을 위한 책 목록(화면에는 보이지 않는다)
+    .replace('</body>', () => '<noscript><nav aria-label="전체 작품 목록"><h2>' + esc(site.author) + ' 전체 작품</h2><ul>' +
+      list.slice().sort((a, b) => b.y - a.y || a.title.localeCompare(b.title, 'ko')).map(b => `<li><a href="${esc(keyOf(b))}/">${esc(b.title)}</a> (${esc(b.tgt)}, ${b.y})</li>`).join('') + '</ul></nav></noscript>\n</body>')));
   const noOg = [];
   for (const b of list) {
     const k = keyOf(b), d = path.join(out, k);
     if (!hasOg(k + '.jpg')) noOg.push(b.title);
     fs.mkdirSync(d, { recursive: true });
-    fs.writeFileSync(path.join(d, 'index.html'), noPh(html
+    fs.writeFileSync(path.join(d, 'index.html'), noPh(staticDetail(html, b)
       // 끝 '/' 없이 들어오면(서버에 따라) 그림 경로가 어긋나므로 '/'를 붙여 다시 연다
       .replace('{{BASE}}', () => `<script>if(!location.pathname.endsWith('/'))location.replace(location.pathname+'/'+location.search+location.hash)</script>\n<base href="../">`)
       .replace(/<title>[^<]*<\/title>/, () => `<title>${esc(b.title)} · ${esc(site.title)}</title>`)
-      .replace(/<meta name="description" content="[^"]*">/, () => `<meta name="description" content="${esc(b.one)}">`)
-      .replace('{{OG}}', () => ogTags({ type: 'book', title: `${b.title} · ${site.author}`, desc: b.one, pagePath: k + '/', img: k + '.jpg' }))));
+      .replace(/<meta name="description" content="[^"]*">/, () => `<meta name="description" content="${esc(`${b.one} ${b.authors.join(', ')} 작가의 ${b.tgt}${b.cat && b.cat !== b.tgt ? ' ' + b.cat : ''}(${b.y}). 주제: ${b.kw.join(', ')}.`)}">`)
+      .replace('{{OG}}', () => ogTags({ type: 'book', title: `${b.title} · ${site.author}`, desc: b.one, pagePath: k + '/', img: k + '.jpg' }) + (URL0 ? '\n' + bookLd(b, URL0, k, hasOg(k + '.jpg')) : ''))));
   }
+  // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html
+  if (URL0) {
+    const urls = [URL0, ...list.map(b => URL0 + keyOf(b) + '/')];
+    fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
+    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${URL0}sitemap.xml\n`);
+  }
+  fs.writeFileSync(path.join(out, '404.html'), notFound(site.title, [[URL0 || './', site.title + ' 첫 화면으로']]));
   if (!URL0) console.warn(`[${site.slug}] 배포 주소(sites/${site.slug}.json의 "url")가 없어 미리보기 그림 태그를 넣지 않았습니다. 카카오톡 미리보기에 그림이 뜨지 않습니다.`);
   if (noOg.length) console.warn(`[${site.slug}] 미리보기 그림이 없는 책 ${noOg.length}권: ${noOg.slice(0, 5).join(', ')}${noOg.length > 5 ? ' …' : ''} → npm run og`);
   await serifSubset(html.replace(/<[^>]+>/g, ''), path.join(out, 'assets', 'fonts'));
@@ -208,4 +261,5 @@ if (!only) {
     (built.length === 1 ? `<meta http-equiv="refresh" content="0; url=${esc(built[0].slug)}/">` : '') +
     `<style>body{font-family:system-ui,sans-serif;max-width:560px;margin:15vh auto;padding:0 20px}a{color:#1F3FB0}</style><h1>작품 서가</h1><ul>${links}</ul>`);
   fs.writeFileSync(P('dist', '.nojekyll'), '');
+  fs.writeFileSync(P('dist', '404.html'), notFound('작품 서가', built.map(s => [s.url || s.slug + '/', s.title])));
 }

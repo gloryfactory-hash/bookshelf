@@ -17,11 +17,14 @@
 - `src/` — 모든 서가가 함께 쓰는 화면 코드. `index.html`(틀), `style.css`, `app.js`.
 - `data/og/<slug>/` — 카카오톡 미리보기 그림(1200×630). 책마다 `<ISBN>.jpg`, 서가용 `site.jpg`(신간 표지). `npm run og`가 만든다. 배포 서버에는 브라우저가 없어서 표지처럼 여기서 만들어 함께 올린다. 직접 고치지 않는다.
 - `scripts/import.js`, `scripts/build.js`, `scripts/og.js`, `scripts/shot.js`, `scripts/serve.js`(GitHub Pages처럼 동작하는 작은 서버)
+- 검색엔진용(2026-11-08): build가 서가마다 `sitemap.xml`·`robots.txt`(`url`이 있을 때), `404.html`(없는 주소 화면. 없으면 Cloudflare Pages가 아무 주소에나 첫 화면을 200으로 보낸다)을 만든다. 책 페이지는 상세 칸(제목·소개·주제·추천·도서 정보·서점)을 HTML에 글자로 미리 채우고(숨긴 채, app.js가 같은 자리를 다시 채움) 책 구조화 데이터(schema.org Book)를 넣는다. 첫 화면에는 WebSite 데이터와 `<noscript>` 책 목록. 검색 등록: 네이버 서치어드바이저·구글 서치 콘솔에 https://limjh.kr/ 와 sitemap.xml(사용자 계정).
+- 서가 미리보기 책(`shareBook`, ISBN 또는 ID): 카톡 등에 서가 주소를 붙였을 때 그림·설명에 쓰는 책. 없으면 신간. 임지형은 'ONE MORE!'(9788968971464, 2026-11-08 작가 요청: 신간이 앤솔러지라서). 진열대 첫 화면 순서와는 상관없다. 규칙은 `scripts/share.js`(og.js·build.js가 같이 씀). 바꾸면 `npm run og` → build. 미리보기 그림 주소의 `?v=`는 그림 내용으로 정해져 그림만 바뀌어도 카톡이 새로 가져간다.
 - `dist/` — 빌드 결과(자동 생성, 커밋하지 않음). `.github/workflows/deploy.yml`이 GitHub Pages로 배포한다.
 - 저장소: https://github.com/gloryfactory-hash/bookshelf (공개, 2026-11-08). 사이트: https://gloryfactory-hash.github.io/bookshelf/limjihyung/
   - `main`에 올리면 Actions가 import → build → Pages 배포를 한다. 배포(올리기)는 사용자가 하라고 할 때만 한다.
 - 임지형 서가 대표 주소: **https://limjh.kr/** (2026-11-08부터. 그 전에는 노션 페이지로 넘겨주던 주소). 도메인은 가비아에서 샀고 DNS는 Cloudflare(계정 gloryfactory@gmail.com, 존 limjh.kr).
   - Cloudflare Pages 프로젝트 `limjh`(limjh.pages.dev)에 `dist/limjihyung`을 직접 올린다. limjh.kr·www.limjh.kr은 이 프로젝트에 붙어 있다(DNS CNAME → limjh.pages.dev, 주황 구름).
+  - 방문 지표: Cloudflare Web Analytics(2026-11-08 켬, 무료, 쿠키 없음). limjh.kr 존에 자동 삽입(auto_install)이라 src에 코드를 넣지 않는다. 보는 곳: 대시보드 → Analytics & Logs → Web Analytics → limjh.kr. github.io 방문과 단추 클릭 수는 세지 않는다.
   - 노션으로 넘겨주던 Cloudflare 넘겨주기 규칙(Rules → Redirect Rules, 'default' 안의 규칙)은 지우지 않고 꺼 두었다. 다시 켜면 노션으로 돌아간다(그때는 DNS도 되돌려야 한다).
   - **올릴 때는 둘 다:** GitHub에 올리기(github.io도 계속 열리게) + 사용자 터미널에서 `node scripts/build.js limjihyung && npx --yes wrangler@4 pages deploy dist/limjihyung --project-name limjh --branch main --commit-dirty=true` (wrangler 로그인이 사용자 터미널에 있다). 카톡 미리보기 태그의 주소는 `sites/limjihyung.json`의 `url`(https://limjh.kr/)이라 github.io에서 열어도 대표 주소는 limjh.kr로 잡힌다.
   - 공개 저장소라 `회의록.md`, `시안/`, `.claude/`, `.impeccable/`은 올리지 않는다(.gitignore). 커밋 작성자 메일은 깃허브 공개용 주소(`282479204+gloryfactory-hash@users.noreply.github.com`, 이 폴더의 git 설정)를 쓴다.

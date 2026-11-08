@@ -101,7 +101,15 @@ const scl = u => 1 / (1 + Math.pow(Math.abs(u) / U, 1.6));
 function xsc(u) { const a = Math.abs(u) / 2, i = Math.min(XS.length - 2, Math.floor(a)), f = a - i; return Math.sign(u) * (XS[i] + (XS[i + 1] - XS[i]) * f); }
 const Bf = r => Math.abs(r) < 1 ? (r + Math.sin(Math.PI * r) / Math.PI) / 2 : Math.sign(r) * .5;
 function rel(v, s) { let d = mod(v - s, TOT); if (d >= TOT / 2) d -= TOT; return d; }
-const tOf = b => b.y + .5;
+/* 트랙 위 책 자리 (2026-11-09, 트랙 끌기): 같은 해 진열대 책은 그 해 칸 안에 고르게 나눠 앉힌다(진열대 앞쪽 책이 오른쪽).
+   예전에는 모두 그 해 한가운데(y + .5)라, 끌 때 손가락과 작가 자리가 어긋났다. */
+const TPOS = new Map();
+(() => {
+  const byY = {};
+  for (const b of BOOKS) (byY[b.y] = byY[b.y] || []).push(b);
+  for (const y in byY) { const a = byY[y], k = a.length; a.forEach((b, j) => TPOS.set(b, +y + (k - j - .5) / k)); }
+})();
+const tOf = b => TPOS.get(b);
 
 /* ---------- timeline ---------- */
 const Y0 = Math.min(...BOOKS.map(b => b.y)), Y1 = NEWEST + 1;
@@ -137,7 +145,7 @@ function setCaption(i, dir) {
 
 /* ---------- state ---------- */
 let s = START + N, T = s, last = performance.now();
-let active = -1, dragging = false, hovered = null;
+let active = -1, dragging = false, hovered = null, scrub = null;
 let mx = innerWidth / 2, my = innerHeight / 2;
 let tiltX = 0, tiltY = 0, dotY = tOf(BOOKS[START]);
 /* 트랙 위 작가 (2026-11-08, 시안/track_v1 나). SITE.runner인 서가만. 움직이면 달리기(땀방울), 멈춘 뒤 손 흔들기, 그다음 서기.
@@ -181,7 +189,8 @@ function frame(now) {
     if (Math.abs(T - s) < 1e-4) s = T;
     if (Math.abs(s) > N * 40) { const sh = Math.round(s / N) * N - N; s -= sh; T -= sh; }
     const ai = mod(Math.round(s), N);
-    if (ai !== active) { const dir = active < 0 ? 0 : (Math.sign(T - s) || 1); active = ai; setCaption(ai, dir); }
+    // 트랙을 끄는 동안은 표지 아래 글자가 위아래로 움직이지 않고 바로 바뀐다(빨리 끌 때 번쩍이지 않게)
+    if (ai !== active) { const dir = active < 0 || scrub ? 0 : (Math.sign(T - s) || 1); active = ai; setCaption(ai, dir); }
     const dOpen = dOpenNow();
     const onCover = shelfLive && Math.abs(T - s) < .3 && Math.abs(mx - W / 2) < .55 * dOpen && Math.abs(my - shelfC) < .55 * H;
     const ta = 1 - Math.exp(-7 * dt);
@@ -208,7 +217,9 @@ function frame(now) {
     }
     const i0 = Math.floor(s), f = s - i0, ya = tOf(BOOKS[mod(i0, N)]), yb = tOf(BOOKS[mod(i0 + 1, N)]);
     const yy = yb < ya ? (f < .5 ? ya : yb) : ya + (yb - ya) * f;
-    if (Math.abs(yy - dotY) > 6 || RM.matches) dotY = yy; else dotY += (yy - dotY) * (1 - Math.exp(-14 * dt));
+    // 트랙을 끄는 동안 작가는 손가락 자리로 달려간다
+    if (scrub) dotY = RM.matches ? scrub.t : dotY + (scrub.t - dotY) * (1 - Math.exp(-20 * dt));
+    else if (Math.abs(yy - dotY) > 6 || RM.matches) dotY = yy; else dotY += (yy - dotY) * (1 - Math.exp(-14 * dt));
     dot.style.left = ((dotY - Y0) / (Y1 - Y0) * 100) + '%';
     if (RUN) runner(now);
     // 따라다니는 원 대신 기본 화살표. 책 위에서는 손가락 모양(누를 수 있다는 표시)
@@ -248,11 +259,31 @@ addEventListener('wheel', e => {
 }, { passive: false });
 $('prev').addEventListener('click', () => { T = Math.round(T) - 1; });
 $('next').addEventListener('click', () => { T = Math.round(T) + 1; });
-$('tlhit').addEventListener('click', e => {
-  const r = tl.getBoundingClientRect(), t = Y0 + clamp((e.clientX - r.left) / r.width, 0, 1) * (Y1 - Y0);
-  let best = 0, bd = 1e9; BOOKS.forEach((b, i) => { const d = Math.abs(tOf(b) - t); if (d < bd) { bd = d; best = i; } });
-  T = Math.round(T) + mod(best - mod(Math.round(T), N) + Math.floor(N / 2), N) - Math.floor(N / 2);
+/* 트랙 끌기 (2026-11-09, 사용자 "트랙 전체로 만들어"): 트랙 아무 데나 누르고 끌면 작가가 손가락을 따라 달리고, 책장이 그 자리 책으로 따라온다.
+   책 자리 사이에서는 책장이 부드럽게 넘어가고(이웃한 책일 때), 손을 떼면 가장 가까운 책에 멈춘다. 누르기만 하면 예전처럼 그 자리 책으로 간다. */
+const TSORT = BOOKS.map((b, i) => [tOf(b), i]).sort((a, b) => a[0] - b[0]);
+const TMIN = TSORT[0][0], TMAX = TSORT[TSORT.length - 1][0];
+const tlhit = $('tlhit');
+function tAt(x) { const r = tl.getBoundingClientRect(); return clamp(Y0 + clamp((x - r.left) / r.width, 0, 1) * (Y1 - Y0), TMIN, TMAX); }
+function idxAt(t) {
+  if (TSORT.length < 2) return TSORT[0][1];
+  let k = 0; while (k < TSORT.length - 2 && TSORT[k + 1][0] <= t) k++;
+  const [ta, ia] = TSORT[k], [tb, ib] = TSORT[k + 1], f = tb > ta ? clamp((t - ta) / (tb - ta), 0, 1) : 0;
+  return Math.abs(ia - ib) === 1 ? ia + (ib - ia) * f : (f < .5 ? ia : ib);
+}
+function scrubTo(x) { scrub.t = tAt(x); const i = idxAt(scrub.t); T = i + N * Math.round((T - i) / N); }
+tlhit.addEventListener('pointerdown', e => {
+  if (overlay() || e.button > 0) return;
+  e.preventDefault();
+  scrub = { id: e.pointerId, t: dotY }; dragging = true; tl.classList.add('on');
+  try { tlhit.setPointerCapture(e.pointerId); } catch (_) {}
+  scrubTo(e.clientX);
 });
+tlhit.addEventListener('pointermove', e => { if (scrub && e.pointerId === scrub.id) scrubTo(e.clientX); });
+function scrubEnd(e) { if (!scrub || e.pointerId !== scrub.id) return; scrub = null; dragging = false; tl.classList.remove('on'); T = Math.round(T); }
+tlhit.addEventListener('pointerup', scrubEnd);
+tlhit.addEventListener('pointercancel', scrubEnd);
+tlhit.addEventListener('lostpointercapture', scrubEnd);
 function openShelfBook() { T = Math.round(T); go('b-' + BOOKS[mod(T, N)].id); }
 // 표지 아래 제목을 누르면 책 소개 (2026-11-08, '+' 동그라미 대신). 마우스를 올리면 주황 밑줄
 $('mTitle').addEventListener('click', () => { if (!overlay()) openShelfBook(); });

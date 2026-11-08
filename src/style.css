@@ -138,7 +138,9 @@ button{background:none;border:0;padding:0}
 .tl .yr.first{transform:none}
 .tl .pip{position:absolute;top:12px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#fff;opacity:.9}
 .tl .dot{position:absolute;top:15px;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#1E2421;box-shadow:0 0 0 3px #fff}
-.tl .hit{position:absolute;inset:-10px 0 -6px}
+/* 트랙 끌기 (2026-11-09): 트랙 전체가 잡는 곳. 휴대폰에서 끄는 동안 화면이 밀리지 않게 */
+.tl .hit{position:absolute;inset:-10px 0 -6px;cursor:grab;touch-action:none}
+.tl.on .hit{cursor:grabbing}
 /* 출발 구역: 레인 번호는 위에서 3·2·1(바깥 레인이 위) */
 .tl .start{position:absolute;right:100%;top:0;width:30px;height:30px;border-radius:3px 0 0 3px;display:grid;grid-template-rows:9px 10px 11px;background:
   linear-gradient(#fff,#fff) 0 9px/100% 1.5px no-repeat,linear-gradient(#fff,#fff) 0 19px/100% 1.5px no-repeat,var(--me)}

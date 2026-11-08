@@ -1,0 +1,11 @@
+node_modules/
+dist/
+shots/
+.DS_Store
+.cache/
+# 공개 저장소에 올리지 않는 것 (2026-11-08 사용자 결정): 내부 회의 기록, 시안 사본
+회의록.md
+시안/
+# 작업 도구 설정·점검 기록
+.claude/
+.impeccable/

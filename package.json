@@ -1,0 +1,25 @@
+{
+  "name": "bookshelf",
+  "private": true,
+  "type": "module",
+  "description": "작가별 작품 서가 사이트 (진열대 + 서고 + 상세 페이지)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "import": "node scripts/import.js",
+    "build": "node scripts/build.js",
+    "all": "node scripts/import.js && node scripts/build.js",
+    "shot": "node scripts/shot.js",
+    "dev": "node scripts/build.js && node scripts/serve.js",
+    "og": "node scripts/og.js"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.6",
+    "sharp": "^0.33.5",
+    "subset-font": "^2.9.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}

@@ -52,7 +52,7 @@
 <section class="lib" id="lib" hidden aria-label="전체 작품">
   <div class="libin">
     <div class="lhead">
-      <h1>전체 작품<span class="n" id="libN"></span></h1>
+      <div class="lht"><h1><span id="libH">전체 작품</span><span class="n" id="libN"></span></h1><p class="lintro" id="libIntro" hidden></p></div>
       <div class="tools">
         <label class="search"><span class="sr">제목 검색</span>
           <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l4 4" stroke="currentColor" stroke-width="1.4"/></svg>
@@ -67,6 +67,7 @@
     <div class="chips" id="chips" role="group" aria-label="주제"></div>
     <div class="active" id="active" aria-live="polite"></div>
     <div class="grid" id="grid"></div>
+    <section class="lsub" id="libSub" hidden></section>
     <div class="libfoot lbl"><span>© {{AUTHOR}} · {{CHANNEL}}</span><span id="libNote"></span></div>
   </div>
 </section>

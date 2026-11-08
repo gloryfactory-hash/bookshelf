@@ -232,6 +232,27 @@ button{background:none;border:0;padding:0}
 .empty{grid-column:1/-1;padding:60px 0;font-family:var(--kr);color:var(--muted);font-size:var(--fs-3)}
 .empty button{margin-left:8px;border-bottom:1px solid currentColor;color:var(--accent)}
 .libfoot{margin-top:70px;padding-top:18px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;color:var(--accent)}
+/* 학년·주제 페이지 (2026-11-08): 제목 아래 사실만 담은 소개 한 줄, 격자 아래 '주제로/학년으로 나눠 보기' */
+.lht{min-width:0;flex:0 1 auto}
+.lintro{max-width:44em;margin:16px 0 0;font-family:var(--kr);font-size:var(--fs-3);line-height:1.65;color:var(--muted);word-break:keep-all}
+.lintro[hidden],.lsub[hidden]{display:none}
+.lsub{margin-top:72px;border-top:1px solid var(--rule)}
+.lsub h2{margin:0;padding:22px 0 10px;font-family:var(--kr);font-weight:700;font-size:var(--fs-4);letter-spacing:0;color:var(--accent)}
+.lrow{display:grid;grid-template-columns:minmax(7.5em,max-content) 1fr;gap:6px 36px;padding:14px 0;border-top:1px solid var(--hair)}
+.lrow h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-3);line-height:1.6;color:var(--ink);white-space:nowrap}
+.lrow h3 a{border-bottom:1px solid var(--rule)}
+.lrow h3 .n{margin-left:8px;font-family:var(--sans);font-weight:500;font-size:var(--fs-1);color:var(--muted);font-feature-settings:"tnum"}
+.lrow ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:2px 18px;font-family:var(--kr);font-size:var(--fs-2);line-height:1.6;color:var(--muted);word-break:keep-all}
+.lrow ul a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--hair);text-decoration-thickness:1px;text-underline-offset:4px}
+.lrow a{transition:color .2s,border-color .2s}
+@media (hover:hover){.lrow a:hover{color:var(--accent);border-color:var(--accent)}.lrow ul a:hover{text-decoration-color:var(--accent)}}
+.lrow a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.dkw a{display:inline-flex;align-items:center;height:28px;padding:0 10px;background:var(--chip);color:var(--accent);font-family:var(--kr);font-size:var(--fs-2)}
+/* 학년·주제 페이지에서는 0권인 주제 단추를 숨긴다(검색으로 들어온 사람에게 회색 단추 두 줄은 소음). 고른 것은 남긴다 */
+.land .chips .chip:disabled:not([aria-pressed="true"]){display:none}
+@media (max-width:767px){.lrow{grid-template-columns:1fr;gap:8px}.lsub{margin-top:56px}.lintro{margin-top:12px;font-size:var(--fs-2)}
+  .lrow ul a{display:inline-block;padding:5px 0} /* 손가락으로 누를 높이 */
+  .tools{flex-wrap:nowrap;width:100%}.tools .search{flex:1;min-width:0}.tools .search input{width:100%}}
 
 /* detail */
 .detail{position:fixed;inset:0;background:var(--sheet);z-index:60;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}

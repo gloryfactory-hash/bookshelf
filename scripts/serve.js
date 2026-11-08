@@ -15,7 +15,7 @@ export function serve(dir, port = 0) {
     let f = path.join(dir, u);
     if (!f.startsWith(dir)) { res.writeHead(403).end(); return; }
     if (fs.existsSync(f) && fs.statSync(f).isDirectory()) {
-      if (!u.endsWith('/')) { res.writeHead(301, { Location: u + '/' }).end(); return; }
+      if (!u.endsWith('/')) { res.writeHead(301, { Location: encodeURI(u) + '/' }).end(); return; }
       f = path.join(f, 'index.html');
     }
     if (!fs.existsSync(f)) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404 없는 주소입니다'); return; }

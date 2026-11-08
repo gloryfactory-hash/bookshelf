@@ -12,17 +12,24 @@ const BYKEY = new Map(ALL.map(b => [b.isbn || b.id, b]));
 const ROOT = new URL('./', document.baseURI).pathname;
 const BYPATH = location.protocol !== 'file:';
 const SITE_TITLE = document.querySelector('meta[property="og:site_name"]')?.content || document.title;
+/* 학년·주제 페이지 (2026-11-08): 'g-중학년' → <서가>/3-4학년/, 'k-가족' → <서가>/주제/가족/. build.js가 정한 목록(SITE.pages)만.
+   화면은 그 조건으로 연 '전체 작품'. 서고에서 조건이 학년 하나나 주제 하나만 남으면 주소도 그 페이지로 바꾼다. */
+const PAGE = new Map((SITE.pages || []).map(p => [p.k, p]));
+const PAGEP = new Map((SITE.pages || []).map(p => [p.p, p.k]));
 function curRoute() {
   if (BYPATH && location.pathname.startsWith(ROOT)) {
-    const rest = location.pathname.slice(ROOT.length).replace(/index\.html$/, '').replace(/\/$/, '');
+    let rest = location.pathname.slice(ROOT.length).replace(/index\.html$/, '').replace(/\/$/, '');
+    try { rest = decodeURIComponent(rest); } catch (e) { /* 그대로 */ }
     const b = BYKEY.get(rest) || BYID.get(rest);
     if (b) return 'b-' + b.id;
+    if (PAGEP.has(rest)) return PAGEP.get(rest);
   }
   const h = location.hash.slice(1), b = BYKEY.get(h);
   return b ? 'b-' + b.id : h;
 }
 function urlFor(h) {
   if (h.startsWith('b-') && BYID.has(h.slice(2))) { const b = BYID.get(h.slice(2)); return ROOT + (b.isbn || b.id) + '/'; }
+  if (PAGE.has(h)) return ROOT + encodeURI(PAGE.get(h).p) + '/';
   return ROOT + (h && h !== 'shelf' ? '#' + h : '');
 }
 const TGT = SITE.targets.map(t => [t.name, t.label]);
@@ -328,13 +335,23 @@ function renderLib() {
   chipBtns.forEach(([k, bt]) => { const n = kbase.filter(b => b.kw.includes(k)).length; bt.querySelector('.n').textContent = n; bt.setAttribute('aria-pressed', String(F.kw === k)); bt.disabled = !n && F.kw !== k; });
   foldChips();
   const list = ALL.filter(b => pass(b)).sort(sorter);
+  const lk = landKey(), pg = lk && PAGE.get(lk);
+  $('libH').textContent = pg ? pg.h : '전체 작품';
+  $('libN').textContent = (pg ? list.length : ALL.length) + '권';
+  $('libIntro').hidden = !pg; $('libIntro').textContent = pg ? pg.t : '';
+  renderSub(pg);
+  if (view === 'lib' && openId === null) {
+    document.title = pg ? `${pg.h} · ${SITE_TITLE}` : SITE_TITLE;
+    if (BYPATH) { const u = urlFor(lk || 'books'); if (location.pathname + location.hash !== u) history.replaceState(null, '', u); }
+  }
   activeBar.textContent = '';
   const tags = [];
   if (F.series) tags.push(['시리즈: ' + F.series, () => { F.series = null; }]);
   if (F.tgt) tags.push([F.tgt, () => { F.tgt = null; }]);
   if (F.kw) tags.push([F.kw, () => { F.kw = null; }]);
   if (F.q) tags.push(['“' + F.q + '”', () => { F.q = ''; $('q').value = ''; }]);
-  if (tags.length) activeBar.append(el('span', null, list.length + '권')); // 조건이 없으면 제목의 '전체 작품 70권'과 겹치니 빼다
+  document.body.classList.toggle('land', !!pg); // 학년·주제 페이지: 0권 주제 단추는 숨김(style.css .land)
+  if (tags.length && !pg) activeBar.append(el('span', null, list.length + '권')); // 학년·주제 페이지는 제목에 권수가 있다 // 조건이 없으면 제목의 '전체 작품 70권'과 겹치니 빼다
   for (const [label, fn] of tags) {
     const t = el('span', 'tag', label), x = el('button'); x.setAttribute('aria-label', label + ' 조건 빼기');
     x.innerHTML = '<svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.4"/></svg>';
@@ -354,6 +371,24 @@ function renderLib() {
     grid.append(cardFor(b));
   }
 }
+// 지금 조건이 학년 하나나 주제 하나뿐이고 그 페이지가 있으면 그 페이지 열쇠
+function landKey() {
+  if (F.series || F.q) return null;
+  const k = F.tgt && !F.kw ? 'g-' + F.tgt : !F.tgt && F.kw ? 'k-' + F.kw : null;
+  return k && PAGE.has(k) ? k : null;
+}
+// 학년 페이지는 '주제로 나눠 보기', 주제 페이지는 '학년으로 나눠 보기' (build.js landingStatic과 같은 모양)
+function renderSub(pg) {
+  const sub = $('libSub'); sub.textContent = ''; sub.hidden = !pg || !pg.g.length; if (sub.hidden) return; // 책이 적어 나눌 게 없으면 숨김
+  sub.append(el('h2', null, pg.gh));
+  for (const [label, key, ids] of pg.g) {
+    const row = el('div', 'lrow'), h3 = el('h3'), ul = el('ul');
+    if (key) { const a = el('a', null, label); a.href = urlFor(key); a.dataset.go = key; h3.append(a); } else h3.append(label);
+    h3.append(el('span', 'n', ids.length + '권'));
+    for (const id of ids) { const b = BYID.get(id); if (!b) continue; const li = el('li'), a = el('a', null, b.title); a.href = urlFor('b-' + id); a.dataset.go = 'b-' + id; li.append(a); ul.append(li); }
+    row.append(h3, ul); sub.append(row);
+  }
+}
 function resetF() { F.tgt = F.kw = F.series = null; F.q = ''; $('q').value = ''; renderLib(); }
 $('libNote').textContent = SITE.note || '';
 
@@ -363,7 +398,7 @@ for (const t of SITE.targets) {
   const n = ALL.filter(b => b.tgt === t.name).length; if (!n) continue;
   const bt = el('button'); bt.append(el('b', null, SHORT[t.name] || t.name), el('span', 'n', n + '권'));
   bt.setAttribute('aria-label', `${t.label}(${t.name}) 책 ${n}권 보기`);
-  bt.addEventListener('click', () => { F.tgt = t.name; F.kw = F.series = null; F.q = ''; $('q').value = ''; go('books'); });
+  bt.addEventListener('click', () => { F.tgt = t.name; F.kw = F.series = null; F.q = ''; $('q').value = ''; go(PAGE.has('g-' + t.name) ? 'g-' + t.name : 'books'); });
   $('grb').append(bt);
 }
 $('grb').style.setProperty('--gn', $('grb').children.length); // 휴대폰에서 칸을 같은 너비로 나눈다
@@ -375,6 +410,12 @@ function go(h) {
 }
 let histDepth = 0;
 addEventListener(BYPATH ? 'popstate' : 'hashchange', () => route());
+// 학년·주제 페이지의 책·나눠 보기 링크(data-go): 진짜 주소가 있는 링크지만 서가 안에서는 go로 연다
+document.addEventListener('click', e => {
+  if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const l = e.target.closest && e.target.closest('a[data-go]'); if (!l) return;
+  e.preventDefault(); go(l.dataset.go);
+});
 // '#'로 시작하는 링크(작가 화면의 책 이름, '강연 문의')도 go로 보낸다. 시리즈 링크처럼 먼저 처리한 것은 건드리지 않는다.
 if (BYPATH) document.addEventListener('click', e => {
   if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -425,7 +466,8 @@ function route() {
   if (h.startsWith('b-') && BYID.has(h.slice(2))) { openDetail(BYID.get(h.slice(2))); return; }
   if (openId !== null) closeDetail();
   seenHome = true;
-  view = h === 'books' ? 'lib' : (about && ABOUT_HASH.includes(h)) ? 'about' : 'shelf';
+  if (PAGE.has(h)) { F.tgt = h[0] === 'g' ? h.slice(2) : null; F.kw = h[0] === 'k' ? h.slice(2) : null; F.series = null; F.q = ''; $('q').value = ''; }
+  view = h === 'books' || PAGE.has(h) ? 'lib' : (about && ABOUT_HASH.includes(h)) ? 'about' : 'shelf';
   showPanel(view, view === 'about' && h !== 'about' ? h : null);
   if (view === 'shelf' && booted) shelf.focus({ preventScroll: true });
 }
@@ -464,7 +506,7 @@ function fillDetail(b) {
   $('dTitle').textContent = b.title;
   $('dOne').textContent = b.one;
   const kw = $('dKw'); kw.textContent = '';
-  for (const k of b.kw) { const bt = el('button', null, k); bt.addEventListener('click', () => { F.tgt = null; F.kw = k; F.series = null; F.q = ''; $('q').value = ''; go('books'); }); kw.append(bt); }
+  for (const k of b.kw) { const bt = el('button', null, k); bt.addEventListener('click', () => { F.tgt = null; F.kw = k; F.series = null; F.q = ''; $('q').value = ''; go(PAGE.has('k-' + k) ? 'k-' + k : 'books'); }); kw.append(bt); }
   $('dSyn').textContent = b.desc;
   const rec = $('dRec'); rec.textContent = '';
   if (b.rec.length) { const ul = el('ul'); b.rec.forEach(r => ul.append(el('li', null, r))); rec.append(el('h3', null, '추천·선정'), ul); }

@@ -183,6 +183,54 @@ n += 2;
     await ctx.close();
   }
 }
+// 학년·주제 페이지 (2026-11-08, 한글 주소): 바로 들어오기, 서가 안 이동, 주소 맞추기, 자바스크립트 없이 읽히는 글자
+{
+  const fail = m => errors.push('pages: ' + m);
+  const sd = JSON.parse((await (await fetch(url)).text()).match(/id="site-data">([\s\S]*?)<\/script>/)[1]);
+  const pages = sd.pages || [];
+  const sm = fs.existsSync(path.join(root, 'dist', slug, 'sitemap.xml')) ? fs.readFileSync(path.join(root, 'dist', slug, 'sitemap.xml'), 'utf8') : null;
+  for (const pg of pages) {
+    const r = await fetch(url + encodeURI(pg.p) + '/');
+    if (r.status !== 200) { fail(`${pg.p}/ 가 ${r.status}`); continue; }
+    const t = await r.text();
+    if (!t.includes(`<span id="libH">${pg.h}</span>`) || !t.includes('id="libIntro">')) fail(`${pg.p}: 미리 채운 제목·소개가 없음`);
+    if (!/<a class="card" href="[^"]+\/" data-go="b-/.test(t) || (pg.g.length > 0) !== t.includes('class="lrow"')) fail(`${pg.p}: 미리 채운 책 목록·나눠 보기가 없음`);
+    if (sm && !sm.includes(encodeURI(pg.p) + '/</loc>')) fail(`${pg.p}: sitemap에 없음`);
+  }
+  if (pages.length) {
+    const g = pages.find(x => x.k[0] === 'g'), k = pages.find(x => x.k[0] === 'k');
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } }), p = await ctx.newPage();
+    p.on('pageerror', e => errors.push('pages: ' + e.message));
+    const st = () => p.evaluate(() => ({ path: decodeURIComponent(location.pathname + location.hash), h: document.getElementById('libH').textContent, lib: !document.getElementById('lib').hidden, intro: !document.getElementById('libIntro').hidden, rows: document.querySelectorAll('#libSub .lrow').length }));
+    await p.goto(url + encodeURI(g.p) + '/'); await p.waitForTimeout(1500);
+    let s1 = await st();
+    if (!s1.lib || s1.h !== g.h || !s1.intro || s1.rows !== g.g.length) fail(`${g.p} 바로 열기가 이상함 ${JSON.stringify(s1)}`);
+    await p.screenshot({ path: out('18-grade-page') });
+    if (k) {
+      await p.goto(url); await p.waitForTimeout(1500);
+      await p.click('#navLib'); await p.waitForTimeout(900);
+      await p.click(`#chips .chip:has-text("${k.k.slice(2)}")`).catch(() => fail('주제 단추를 못 찾음')); await p.waitForTimeout(500);
+      s1 = await st();
+      if (!s1.path.endsWith('/' + k.p + '/') || s1.h !== k.h) fail(`서고에서 주제를 고르면 주소가 그 페이지로 바뀌지 않음 ${JSON.stringify(s1)}`);
+      await p.click('#libSub .lrow ul a'); await p.waitForTimeout(1500);
+      if (await p.evaluate(() => document.getElementById('detail').hidden)) fail('나눠 보기의 책 이름을 눌러도 책 소개가 안 열림');
+      await p.keyboard.press('Escape'); await p.waitForTimeout(1200);
+      s1 = await st();
+      if (!s1.path.endsWith('/' + k.p + '/')) fail(`책을 닫으면 주제 페이지로 돌아오지 않음 ${JSON.stringify(s1)}`);
+    }
+    await ctx.close();
+    const m = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();
+    await m.goto(url + encodeURI((k || g).p) + '/'); await m.waitForTimeout(1500);
+    const mo = await m.evaluate(() => { const R = s => document.querySelector(s).getBoundingClientRect(); return { introTop: R('#libIntro').top, searchTop: R('.lhead .search').top, sw: document.documentElement.scrollWidth, lw: document.getElementById('lib').scrollWidth }; });
+    if (mo.introTop > mo.searchTop) fail('휴대폰에서 소개 글이 검색 칸 아래로 내려감');
+    if (mo.lw > 390) fail(`휴대폰에서 가로로 넘침 (${mo.lw})`);
+    await m.screenshot({ path: out('19-mobile-topic-page') });
+    await m.evaluate(() => document.getElementById('lib').scrollTo(0, 1e6)); await m.waitForTimeout(300);
+    await m.screenshot({ path: out('20-mobile-topic-groups') });
+    n += 3;
+    console.log(`학년·주제 페이지 ${pages.length}개 확인`);
+  }
+}
 await browser.close();
 srv.close();
 console.log(`캡처 ${n}장 → shots/${slug}-*.png`);

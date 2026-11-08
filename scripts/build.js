@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import subsetFont from 'subset-font';
 import { sheetSvg, sweatSvg, heartSvg, FW, FH, ORDER } from './sprite.js';
-import { shareBookOf } from './share.js';
+import { shareBookOf, newestFirst } from './share.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => path.join(root, ...p);
@@ -107,12 +107,12 @@ function aboutHtml(site, list, photo) {
 // 책 페이지는 화면을 자바스크립트가 그리지만, 검색엔진(특히 네이버)이 읽도록 상세 칸에 같은 내용을 글자로 미리 채워 둔다.
 // 화면 모습은 그대로다: 상세 칸은 숨긴 채로 두고, app.js가 열 때 같은 자리를 다시 채운다(fillDetail).
 const AGE = Object.fromEntries(vocab.targets.map(t => [t.name, t.label]));
-function staticDetail(h, b) {
+function staticDetail(h, b, topicHref = () => null) {
   const fill = (open, inner) => { if (!h.includes(open + '</')) throw new Error('상세 칸 자리를 못 찾음: ' + open); h = h.replace(open + '</', () => open + inner + '</'); };
   fill('<span class="dsub" id="dSub">', esc(b.tgt + ' / ' + b.cat + (b.series ? ' / ' + b.series + ' 시리즈' : '')));
   fill('<h2 class="dtitle" id="dTitle">', esc(b.title));
   fill('<p class="done" id="dOne">', esc(b.one));
-  fill('<div class="dkw" id="dKw">', b.kw.map(k => `<span>${esc(k)}</span>`).join(''));
+  fill('<div class="dkw" id="dKw">', b.kw.map(k => topicHref(k) ? `<a href="${esc(topicHref(k))}">${esc(k)}</a>` : `<span>${esc(k)}</span>`).join(''));
   fill('<p class="dsyn" id="dSyn">', esc(b.desc));
   if (b.rec.length) fill('<div class="drec" id="dRec">', '<h3>추천·선정</h3><ul>' + b.rec.map(r => `<li>${esc(r)}</li>`).join('') + '</ul>');
   const age = AGE[b.tgt], rows = [['지은이', b.authors.join(', ')], ['대상', b.tgt + (age && age !== b.tgt ? ` (${age})` : '')]];
@@ -142,6 +142,61 @@ main{max-width:420px}h1{margin:0 0 12px;font-size:22px;color:var(--a)}p{margin:0
 a{display:inline-flex;align-items:center;height:44px;padding:0 18px;border:1px solid var(--a);background:var(--a);color:var(--p);font-weight:700;text-decoration:none;margin:0 8px 8px 0}</style></head>
 <body><main><h1>이 주소에는 페이지가 없어요</h1><p>주소가 바뀌었거나 잘못 입력되었을 수 있어요.</p>${links.map(([h, t]) => `<a href="${esc(h)}">${esc(t)}</a>`).join('')}</main></body></html>`;
 
+// ---------- 학년·주제 페이지 (2026-11-08, 사용자 "학년, 주제별 페이지" · 한글 주소) ----------
+// 주소: <서가>/3-4학년/, <서가>/주제/가족/. 책이 MIN_PAGE권 이상인 학년·주제만 만든다(빈약한 페이지는 검색에도 좋지 않다).
+// 화면은 '전체 작품'(서고)을 그 조건으로 연 것과 같다. 검색엔진이 읽도록 제목·소개·책 목록·나눠 보기를 글자로 미리 채운다.
+// app.js는 SITE.pages(아래 pages의 k·p·h·t·gh·g)로 같은 화면을 그리고, 서고에서 조건을 바꾸면 주소도 맞춰 바꾼다.
+const MIN_PAGE = 3;
+const NOT_REC = /MD 추천|언론 추천|한우리|기금 지원|대출 1위/;
+const topicSlug = k => k.replace(/·/g, '-').replace(/\s+/g, '-');
+const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1) - 0xAC00; return w + (c >= 0 && c < 11172 && c % 28 ? a : b); };
+function landingPages(site, list) {
+  const sorted = list.slice().sort(newestFirst);
+  const gOK = new Set(vocab.targets.filter(t => list.filter(b => b.tgt === t.name).length >= MIN_PAGE).map(t => t.name));
+  const kOK = new Set(vocab.keywords.filter(k => list.filter(b => b.kw.includes(k)).length >= MIN_PAGE));
+  // 실제 선정·추천 이력만 센다 (books.json rec). 서점 MD·언론 추천, 기금 지원, 대출 순위는 빼고(교사·사서가 믿는 기관 추천만),
+  // 많이 받은 이름 둘을 예로 든다
+  const recOf = b => b.rec.filter(x => !NOT_REC.test(x));
+  const recLine = bs => {
+    const r = bs.filter(b => recOf(b).length); if (!r.length) return '';
+    const cnt = new Map(); for (const x of r.flatMap(recOf)) cnt.set(x, (cnt.get(x) || 0) + 1);
+    const top = [...cnt].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ko')).slice(0, 2).map(x => x[0]);
+    return ` ${r.length === bs.length ? `${r.length}권 모두` : `그중 ${r.length}권은`} ${top.length > 1 ? top.join(', ') + ' 같은 기관의 선정·추천을' : josa(top[0], '을', '를')} 받았어요.`;
+  };
+  const pages = [];
+  for (const t of vocab.targets) {
+    if (!gOK.has(t.name)) continue;
+    const bs = sorted.filter(b => b.tgt === t.name);
+    const cc = new Map(); for (const b of bs) if (b.cat && b.cat !== '일반') cc.set(b.cat, (cc.get(b.cat) || 0) + 1);
+    const cats = [...cc].sort((a, b) => b[1] - a[1]).map(x => x[0]); // 많은 갈래부터: '1~2학년 동화·그림책'
+    const h = t.name === '일반' ? '어른을 위한 책' : t.name === '청소년' ? (cats.length === 1 ? cats[0] : '청소년 책') : `${t.short} ${cats.join('·') || '책'}`;
+    const g = vocab.keywords.map(k => [k, bs.filter(b => b.kw.includes(k))]).filter(([, x]) => x.length >= 2)
+      .sort((a, b) => b[1].length - a[1].length).map(([k, x]) => [k, kOK.has(k) ? 'k-' + k : null, x.map(b => b.id)]);
+    pages.push({ k: 'g-' + t.name, p: t.slug, h, t: `${josa(t.label, '을', '를')} 위한 ${site.author} 작가의 책 ${bs.length}권이에요.` + recLine(bs), gh: '주제로 나눠 보기', g, books: bs });
+  }
+  for (const k of vocab.keywords) {
+    if (!kOK.has(k)) continue;
+    const bs = sorted.filter(b => b.kw.includes(k));
+    const g = vocab.targets.map(t => [t, bs.filter(b => b.tgt === t.name)]).filter(([, x]) => x.length)
+      .map(([t, x]) => [t.short, gOK.has(t.name) ? 'g-' + t.name : null, x.map(b => b.id)]);
+    pages.push({ k: 'k-' + k, p: '주제/' + topicSlug(k), h: k + ' 이야기', t: `'${josa(k, "'을", "'를")} 다룬 ${site.author} 작가의 책 ${bs.length}권이에요.` + recLine(bs), gh: '학년으로 나눠 보기', g, books: bs });
+  }
+  return pages;
+}
+// 학년·주제 페이지의 미리 채운 글자 (app.js renderLib·renderSub와 같은 모양)
+function landingStatic(h, pg, byId, keyOf, pageOf) {
+  const fill = (a, b) => { if (!h.includes(a)) throw new Error('서고 자리를 못 찾음: ' + a); h = h.replace(a, () => b); };
+  fill('<section class="lib" id="lib" hidden aria-label="전체 작품">', `<section class="lib" id="lib" aria-label="${esc(pg.h)}">`);
+  fill('<span id="libH">전체 작품</span><span class="n" id="libN"></span>', `<span id="libH">${esc(pg.h)}</span><span class="n" id="libN">${pg.books.length}권</span>`);
+  fill('<p class="lintro" id="libIntro" hidden></p>', `<p class="lintro" id="libIntro">${esc(pg.t)}</p>`);
+  fill('<div class="grid" id="grid"></div>', '<div class="grid" id="grid">' + pg.books.map(b =>
+    `<a class="card" href="${esc(keyOf(b))}/" data-go="b-${esc(b.id)}"><div class="cvr"><img src="covers/${esc(b.id)}-s.webp?v=${VER}" alt="" loading="lazy" decoding="async"></div><div class="t">${esc(b.title)}</div><div class="o">${esc(b.one)}</div><div class="mt">${esc(b.tgt)} / ${b.y}</div></a>`).join('') + '</div>');
+  if (pg.g.length) fill('<section class="lsub" id="libSub" hidden></section>', `<section class="lsub" id="libSub"><h2>${esc(pg.gh)}</h2>` + pg.g.map(([label, key, ids]) =>
+    `<div class="lrow"><h3>${key ? `<a href="${esc(pageOf(key))}/" data-go="${esc(key)}">${esc(label)}</a>` : esc(label)}<span class="n">${ids.length}권</span></h3><ul>` +
+    ids.map(id => byId.get(id)).map(b => `<li><a href="${esc(keyOf(b))}/" data-go="b-${esc(b.id)}">${esc(b.title)}</a></li>`).join('') + '</ul></div>').join('') + '</section>');
+  return h;
+}
+
 const sites = fs.readdirSync(P('sites')).filter(f => f.endsWith('.json')).map(f => JSON.parse(fs.readFileSync(P('sites', f), 'utf8')));
 const built = [];
 for (const site of sites) {
@@ -169,7 +224,8 @@ for (const site of sites) {
     const r = await sharp(P(site.about.photo)).rotate().resize({ height: 1200, withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(out, 'assets', 'author.webp'));
     photo = { file: 'author.webp', w: r.width, h: r.height };
   }
-  const siteData = { runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
+  const pages = landingPages(site, list);
+  const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl
     .replaceAll('{{TITLE}}', esc(site.title))
     .replaceAll('{{DESCRIPTION}}', esc(site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`))
@@ -220,22 +276,37 @@ for (const site of sites) {
         about: { '@type': 'Person', name: site.author, ...(site.role ? { jobTitle: site.role } : {}) } }) + '</script>' : ''))
     // 자바스크립트 없이 읽는 검색엔진을 위한 책 목록(화면에는 보이지 않는다)
     .replace('</body>', () => '<noscript><nav aria-label="전체 작품 목록"><h2>' + esc(site.author) + ' 전체 작품</h2><ul>' +
-      list.slice().sort((a, b) => b.y - a.y || a.title.localeCompare(b.title, 'ko')).map(b => `<li><a href="${esc(keyOf(b))}/">${esc(b.title)}</a> (${esc(b.tgt)}, ${b.y})</li>`).join('') + '</ul></nav></noscript>\n</body>')));
+      list.slice().sort((a, b) => b.y - a.y || a.title.localeCompare(b.title, 'ko')).map(b => `<li><a href="${esc(keyOf(b))}/">${esc(b.title)}</a> (${esc(b.tgt)}, ${b.y})</li>`).join('') + '</ul></nav>' +
+      (pages.length ? '<nav aria-label="학년·주제로 찾기"><h2>학년·주제로 찾기</h2><ul>' + pages.map(pg => `<li><a href="${esc(pg.p)}/">${esc(pg.h)}</a> (${pg.books.length}권)</li>`).join('') + '</ul></nav>' : '') + '</noscript>\n</body>')));
   const noOg = [];
   for (const b of list) {
     const k = keyOf(b), d = path.join(out, k);
     if (!hasOg(k + '.jpg')) noOg.push(b.title);
     fs.mkdirSync(d, { recursive: true });
-    fs.writeFileSync(path.join(d, 'index.html'), noPh(staticDetail(html, b)
+    fs.writeFileSync(path.join(d, 'index.html'), noPh(staticDetail(html, b, k => pages.some(pg => pg.k === 'k-' + k) ? '주제/' + topicSlug(k) + '/' : null)
       // 끝 '/' 없이 들어오면(서버에 따라) 그림 경로가 어긋나므로 '/'를 붙여 다시 연다
       .replace('{{BASE}}', () => `<script>if(!location.pathname.endsWith('/'))location.replace(location.pathname+'/'+location.search+location.hash)</script>\n<base href="../">`)
       .replace(/<title>[^<]*<\/title>/, () => `<title>${esc(b.title)} · ${esc(site.title)}</title>`)
       .replace(/<meta name="description" content="[^"]*">/, () => `<meta name="description" content="${esc(`${b.one} ${b.authors.join(', ')} 작가의 ${b.tgt}${b.cat && b.cat !== b.tgt ? ' ' + b.cat : ''}(${b.y}). 주제: ${b.kw.join(', ')}.`)}">`)
       .replace('{{OG}}', () => ogTags({ type: 'book', title: `${b.title} · ${site.author}`, desc: b.one, pagePath: k + '/', img: k + '.jpg' }) + (URL0 ? '\n' + bookLd(b, URL0, k, hasOg(k + '.jpg')) : ''))));
   }
+  // 학년·주제 페이지: dist/<slug>/3-4학년/index.html, dist/<slug>/주제/가족/index.html
+  const byId = new Map(list.map(b => [b.id, b])), pageOf = key => pages.find(pg => pg.k === key).p;
+  for (const pg of pages) {
+    const d = path.join(out, ...pg.p.split('/')), up = '../'.repeat(pg.p.split('/').length);
+    fs.mkdirSync(d, { recursive: true });
+    const desc = pg.t + ' ' + pg.g.map(([l, , ids]) => `${l} ${ids.length}권`).join(', ') + '.';
+    fs.writeFileSync(path.join(d, 'index.html'), noPh(landingStatic(html, pg, byId, keyOf, pageOf)
+      .replace('{{BASE}}', () => `<script>if(!location.pathname.endsWith('/'))location.replace(location.pathname+'/'+location.search+location.hash)</script>\n<base href="${up}">`)
+      .replace(/<title>[^<]*<\/title>/, () => `<title>${esc(pg.h)} · ${esc(site.title)}</title>`)
+      .replace(/<meta name="description" content="[^"]*">/, () => `<meta name="description" content="${esc(desc)}">`)
+      .replace('{{OG}}', () => ogTags({ type: 'website', title: `${pg.h} · ${site.author}`, desc: pg.t, pagePath: encodeURI(pg.p) + '/', img: 'site.jpg' }) +
+        (URL0 ? '\n<script type="application/ld+json">' + safeJson({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${pg.h} · ${site.title}`, url: URL0 + encodeURI(pg.p) + '/', inLanguage: 'ko', description: pg.t,
+          mainEntity: { '@type': 'ItemList', numberOfItems: pg.books.length, itemListElement: pg.books.map((b, i) => ({ '@type': 'ListItem', position: i + 1, url: URL0 + keyOf(b) + '/', name: b.title })) } }) + '</script>' : ''))));
+  }
   // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html
   if (URL0) {
-    const urls = [URL0, ...list.map(b => URL0 + keyOf(b) + '/')];
+    const urls = [URL0, ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
     fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
     fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${URL0}sitemap.xml\n`);
   }

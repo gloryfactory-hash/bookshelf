@@ -68,8 +68,11 @@ for (let v = 0; v < TOT; v++) {
   const band = el('i', 'band'); band.style.backgroundImage = 'url(' + b.thumb + ')';
   sp.append(band, el('b', 'st', b.title), el('em', 'sa', SITE.spineName), el('small', 'spub', b.pub.replace(/\(.*\)/, '')));
   const cv = el('div', 'face cv'); cv.style.backgroundImage = 'url(' + b.img + ')';
-  e.append(sp, cv); stage.append(e);
-  tapes.push({ v, b, el: e, sp, cv, lift: 0, hidden: false, o: 0, z: -1e9 });
+  // 반대쪽 면(2026-11-08 사용자 "표지로 채워 봐"): 오른쪽 책은 앞표지가 뒤를 향해 책등만 보였다.
+  // 같은 앞표지를 반대쪽에도 붙여, 책들이 가운데 책을 향해 양쪽으로 펼쳐 놓인 것처럼 보이게 한다.
+  const cb = el('div', 'face cv cb'); cb.style.backgroundImage = 'url(' + b.img + ')';
+  e.append(sp, cv, cb); stage.append(e);
+  tapes.push({ v, b, el: e, sp, cv, cb, lift: 0, hidden: false, o: 0, z: -1e9 });
 }
 
 let H, W, ws, gap, U, XS = [], mobile, shelfC;
@@ -84,6 +87,7 @@ function measure() {
     const b = t.b, top = H / 2 - b.bh;
     Object.assign(t.sp.style, { width: ws + 'px', height: b.bh + 'px', left: -ws / 2 + 'px', top: top + 'px', transform: 'translateZ(' + b.bw / 2 + 'px)' });
     Object.assign(t.cv.style, { width: b.bw + 'px', height: b.bh + 'px', left: -b.bw / 2 + 'px', top: top + 'px', transform: 'rotateY(90deg) translateZ(' + ws / 2 + 'px)' });
+    Object.assign(t.cb.style, { width: b.bw + 'px', height: b.bh + 'px', left: -b.bw / 2 + 'px', top: top + 'px', transform: 'rotateY(-90deg) translateZ(' + ws / 2 + 'px)' });
     const bandH = b.bh * .17;
     t.sp.querySelector('.band').style.height = bandH + 'px';
     const fs = Math.min(ws * .42, (b.bh - bandH - ws * 2.2) / ([...b.title].length * 1.08));
@@ -199,7 +203,8 @@ function frame(now) {
       t.el.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,${z.toFixed(2)}px) rotateX(${(tiltX * o).toFixed(3)}deg) rotateY(${ry.toFixed(3)}deg)`;
       t.el.style.zIndex = Math.round(10000 + z); t.o = o; t.z = z;
       t.sp.style.setProperty('--shade', Math.min(.6, o * .55 + (1 - sc) * .32).toFixed(3));
-      t.cv.style.setProperty('--shade', ((1 - o) * .82).toFixed(3));
+      t.cv.style.setProperty('--shade', ((1 - o) * .5).toFixed(3));
+      t.cb.style.setProperty('--shade', ((1 - o) * .5).toFixed(3));
     }
     const i0 = Math.floor(s), f = s - i0, ya = tOf(BOOKS[mod(i0, N)]), yb = tOf(BOOKS[mod(i0 + 1, N)]);
     const yy = yb < ya ? (f < .5 ? ya : yb) : ya + (yb - ya) * f;

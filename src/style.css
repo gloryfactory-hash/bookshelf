@@ -322,6 +322,8 @@ button{background:none;border:0;padding:0}
 .akick{margin:0 0 18px;font-weight:700;font-size:var(--fs-1);letter-spacing:0;color:var(--accent)}
 .aquote{margin:0;font-family:var(--serif);font-weight:700;font-size:var(--fs-6);line-height:1.32;letter-spacing:0;color:var(--ink);text-wrap:balance}
 .alead{margin:26px 0 0;font-weight:700;font-size:var(--fs-4);line-height:1.5;color:var(--accent)}
+.astats{list-style:none;margin:20px 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:8px 28px;font-size:var(--fs-2);line-height:1.4;color:var(--muted)}
+.astats b{margin-right:2px;font-weight:700;font-size:var(--fs-4);color:var(--ink);font-feature-settings:"tnum"}
 .abio p{margin:14px 0 0;font-family:var(--serif);font-weight:400;font-size:var(--fs-3);line-height:1.85;max-width:34em}
 .arun{position:relative;margin-top:52px;padding-top:46px}
 .arun::before{content:"";position:absolute;left:0;right:0;top:0;height:24px;border-radius:3px;background:
@@ -340,8 +342,9 @@ button{background:none;border:0;padding:0}
 .judge .yl li{font-size:var(--fs-2);color:var(--muted)}
 .talks{list-style:none;margin:0;padding:0}
 .talks li{display:grid;grid-template-columns:8.5em 1fr;column-gap:16px;padding:15px 0;border-bottom:1px solid var(--hair)}
-.talks .for{grid-row:span 2;padding-top:3px;font-weight:700;font-size:var(--fs-2);color:var(--accent)}
+.talks .for{grid-row:span 3;padding-top:3px;font-weight:700;font-size:var(--fs-2);color:var(--accent)}
 .talks b{font-weight:700;font-size:var(--fs-3);line-height:1.45}
+.talks .when{margin-top:5px;font-size:var(--fs-2);line-height:1.6;color:var(--ink)}
 .talks .with{margin-top:5px;font-size:var(--fs-2);line-height:1.6;color:var(--muted)}
 .talks .with a{color:var(--ink);border-bottom:1px solid var(--rule)}
 .talks .with a:hover{color:var(--accent);border-color:currentColor}

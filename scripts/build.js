@@ -82,9 +82,12 @@ function aboutHtml(site, list, photo) {
   const yrs = rows => '<ol class="yl">' + rows.map(([y, t]) => `<li><b>${esc(y)}</b><span>${esc(t)}</span></li>`).join('') + '</ol>';
   const talks = (a.talks || []).map(t => {
     const w = [...(t.series || []).map(seriesLink), ...(t.books || []).map(bookLink)];
-    return `<li><span class="for">${esc(t.for)}</span><b>${esc(t.title)}</b>` + (w.length ? `<span class="with">연계 도서 ${w.join(', ')}${t.more ? ' 등' : ''}</span>` : '') + '</li>';
+    return `<li><span class="for">${esc(t.for)}</span><b>${esc(t.title)}</b>` + (t.when ? `<span class="when">${esc(t.when)} 잘 맞아요</span>` : '') + (w.length ? `<span class="with">연계 도서 ${w.join(', ')}${t.more ? ' 등' : ''}</span>` : '') + '</li>';
   }).join('');
   const c = a.contact || {};
+  // 숫자 한 줄 (2026-11-08 의견서): 권수와 기관 선정·추천을 받은 책 수는 자료에서 센다(학년·주제 페이지와 같은 기준). 등단 해는 about.debut.
+  const recN = list.filter(b => b.rec.some(x => !NOT_REC.test(x))).length;
+  const stats = [[list.length, '권의 책'], ...(recN ? [[recN, '권 기관 선정·추천']] : []), ...(a.debut ? [[a.debut, '년 등단']] : [])];
   return `<section class="about" id="about" hidden aria-labelledby="aTitle">
   <div class="ain">
     ${photo ? `<figure class="aphoto"><img src="assets/${photo.file}" width="${photo.w}" height="${photo.h}" alt="${esc(a.photoAlt || '')}" loading="lazy" decoding="async"><figcaption>${esc(a.photoAlt || '')}</figcaption></figure>` : ''}
@@ -92,6 +95,7 @@ function aboutHtml(site, list, photo) {
       <p class="akick">작가 소개</p>
       <h1 class="aquote" id="aTitle">“${esc(a.quote)}”</h1>
       <p class="alead">${esc(a.lead)}</p>
+      <ul class="astats">${stats.map(([n, l]) => `<li><b>${esc(n)}</b>${esc(l)}</li>`).join('')}</ul>
       <div class="abio">${(a.bio || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
       ${a.run ? `<section class="arun"><h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
       ${a.history ? `<section class="asec"><h2>걸어온 길</h2>${yrs(a.history)}${a.judging ? `<details class="judge"><summary>심사 이력 ${a.judging.length}건</summary>${yrs(a.judging)}</details>` : ''}</section>` : ''}
@@ -258,6 +262,8 @@ for (const site of sites) {
   const keyOf = b => b.isbn || b.id;
   const URL0 = site.url ? site.url.replace(/\/?$/, '/') : null; // 배포 주소. 미리보기 그림 태그는 전체 주소가 있어야 한다
   const ogTags = ({ type, title, desc, pagePath, img }) => [
+    // 검색 사이트 소유 확인 태그 (sites/<slug>.json의 verify: { naver, google })
+    ...Object.entries(site.verify || {}).map(([k, v]) => `<meta name="${k}-site-verification" content="${esc(v)}">`),
     `<meta property="og:type" content="${type}">`,
     `<meta property="og:site_name" content="${esc(site.title)}">`,
     `<meta property="og:title" content="${esc(title)}">`,

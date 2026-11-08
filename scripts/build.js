@@ -169,7 +169,7 @@ for (const site of sites) {
     const r = await sharp(P(site.about.photo)).rotate().resize({ height: 1200, withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(out, 'assets', 'author.webp'));
     photo = { file: 'author.webp', w: r.width, h: r.height };
   }
-  const siteData = { runner: !!site.runner, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
+  const siteData = { runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl
     .replaceAll('{{TITLE}}', esc(site.title))
     .replaceAll('{{DESCRIPTION}}', esc(site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`))
@@ -211,7 +211,7 @@ for (const site of sites) {
     ...(URL0 && hasOg(img) ? [`<meta property="og:image" content="${esc(URL0 + 'og/' + img)}?v=${crypto.createHash('sha1').update(fs.readFileSync(path.join(ogOut, img))).digest('hex').slice(0, 8)}">`, '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">', '<meta name="twitter:card" content="summary_large_image">'] : [])
   ].join('\n');
   const noPh = h => { if (/\{\{[A-Z_]+\}\}/.test(h)) throw new Error('채워지지 않은 자리표시자가 있습니다: ' + h.match(/\{\{[A-Z_]+\}\}/)[0]); return h; };
-  const newest = shareBookOf(site, list); // 서가 미리보기 설명의 '신간 『…』'. shareBook이 있으면 그 책(scripts/og.js와 같은 규칙)
+  const newest = shareBookOf(site, list); // 서가 미리보기 설명의 '신간 『…』'. leadBook이 있으면 그 책(scripts/og.js와 같은 규칙)
   const siteDesc = site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`;
   fs.writeFileSync(path.join(out, 'index.html'), noPh(html
     .replace('{{BASE}}', '<base href="./">') // 기준 주소를 처음에 고정한다. 서가 안에서 책 주소로 옮겨 가도 표지·글꼴 경로가 서가 뿌리 기준으로 남는다

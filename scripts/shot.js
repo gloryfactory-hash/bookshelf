@@ -163,7 +163,9 @@ n += 2;
       await p.waitForTimeout(1200);
       if (!/\b(stand|strA|strB|heart)\b/.test(await p.getAttribute('#dot', 'class'))) fail(`${vw}: 멈춘 뒤 서 있지 않음 (${await p.getAttribute('#dot', 'class')})`);
       const tb = await p.locator('#tl').boundingBox();
-      await p.mouse.click(tb.x + tb.width * .2, tb.y + 14); await p.waitForTimeout(120);
+      await p.mouse.click(tb.x + tb.width * .2, tb.y + 14);
+      // 가운데 책과 같은 해 책을 먼저 지나가면 캐릭터가 조금 늦게 출발한다 (leadBook, 2026-11-08). 1초까지 기다린다
+      await p.waitForFunction(() => /\brun\b/.test(document.querySelector('#dot').className), null, { timeout: 1000 }).catch(() => {});
       const c1 = await p.getAttribute('#dot', 'class');
       if (!/\brun\b/.test(c1) || !/\bl\b/.test(c1)) fail(`${vw}: 옛날 책 쪽으로 달리지 않음 (${c1})`);
       if (!mobile) await p.screenshot({ path: out('15-desktop-run') });

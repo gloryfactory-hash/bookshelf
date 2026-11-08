@@ -18,7 +18,7 @@
 - `data/og/<slug>/` — 카카오톡 미리보기 그림(1200×630). 책마다 `<ISBN>.jpg`, 서가용 `site.jpg`(신간 표지). `npm run og`가 만든다. 배포 서버에는 브라우저가 없어서 표지처럼 여기서 만들어 함께 올린다. 직접 고치지 않는다.
 - `scripts/import.js`, `scripts/build.js`, `scripts/og.js`, `scripts/shot.js`, `scripts/serve.js`(GitHub Pages처럼 동작하는 작은 서버)
 - 검색엔진용(2026-11-08): build가 서가마다 `sitemap.xml`·`robots.txt`(`url`이 있을 때), `404.html`(없는 주소 화면. 없으면 Cloudflare Pages가 아무 주소에나 첫 화면을 200으로 보낸다)을 만든다. 책 페이지는 상세 칸(제목·소개·주제·추천·도서 정보·서점)을 HTML에 글자로 미리 채우고(숨긴 채, app.js가 같은 자리를 다시 채움) 책 구조화 데이터(schema.org Book)를 넣는다. 첫 화면에는 WebSite 데이터와 `<noscript>` 책 목록. 검색 등록: 네이버 서치어드바이저·구글 서치 콘솔에 https://limjh.kr/ 와 sitemap.xml(사용자 계정).
-- 서가 미리보기 책(`shareBook`, ISBN 또는 ID): 카톡 등에 서가 주소를 붙였을 때 그림·설명에 쓰는 책. 없으면 신간. 임지형은 'ONE MORE!'(9788968971464, 2026-11-08 작가 요청: 신간이 앤솔러지라서). 진열대 첫 화면 순서와는 상관없다. 규칙은 `scripts/share.js`(og.js·build.js가 같이 씀). 바꾸면 `npm run og` → build. 미리보기 그림 주소의 `?v=`는 그림 내용으로 정해져 그림만 바뀌어도 카톡이 새로 가져간다.
+- 서가 대표 책(`leadBook`, ISBN 또는 ID): 첫 화면 진열대 가운데 책이자, 카톡 등에 서가 주소를 붙였을 때 그림·설명에 쓰는 책. 없으면 신간. 임지형은 'ONE MORE!'(9788968971464, 2026-11-08 작가 요청: 신간이 앤솔러지라서). 진열대 순서(최신순)는 그대로 두고 그 책에서 시작한다. 규칙은 `scripts/share.js`(og.js·build.js가 같이 씀), app.js는 `SITE.lead`. 바꾸면 `npm run og` → build. 미리보기 그림 주소의 `?v=`는 그림 내용으로 정해져 그림만 바뀌어도 카톡이 새로 가져간다.
 - `dist/` — 빌드 결과(자동 생성, 커밋하지 않음). `.github/workflows/deploy.yml`이 GitHub Pages로 배포한다.
 - 저장소: https://github.com/gloryfactory-hash/bookshelf (공개, 2026-11-08). 사이트: https://gloryfactory-hash.github.io/bookshelf/limjihyung/
   - `main`에 올리면 Actions가 import → build → Pages 배포를 한다. 배포(올리기)는 사용자가 하라고 할 때만 한다.
@@ -56,7 +56,7 @@
 
 1. 사용자가 노션에 한 줄 추가하고 CSV와 표지를 준다.
 2. `import` → 오류·경고 확인 → `og` → `build` → `shot` → 캡처 확인. (`og`를 빠뜨리면 build가 '미리보기 그림이 없는 책'을 알려 준다)
-3. 진열대(첫 화면 곡면 서가)에는 최근 `recentCount`권(지금 12권)이 최신순으로 앞에 꽂히고, 그 뒤에 나머지 `대표작`이 최신순으로 이어진다. 첫 화면 가운데는 가장 최근 책이다. 따로 손댈 것 없다. (`recentCount`가 없으면 최근 `recentYears`년 기준. 2026-11-08 결정)
+3. 진열대(첫 화면 곡면 서가)에는 최근 `recentCount`권(지금 12권)이 최신순으로 앞에 꽂히고, 그 뒤에 나머지 `대표작`이 최신순으로 이어진다. 첫 화면 가운데는 `leadBook`(임지형은 ONE MORE!), 없으면 가장 최근 책이다. 신간이 나와 가운데 책을 바꾸려면 `leadBook`을 고치거나 지운다. 따로 손댈 것 없다. (`recentCount`가 없으면 최근 `recentYears`년 기준. 2026-11-08 결정)
 4. 책 추가 작업에서는 `src/`를 고치지 않는다.
 
 ## 화면 설계 원칙 (src를 고칠 때)

@@ -1,6 +1,6 @@
 // 카카오톡 등에 링크를 붙였을 때 뜨는 미리보기 그림(1200×630)을 만든다. 2026-11-08 (시안 시안/address_v1 가안)
 //   data/og/<slug>/<ISBN>.jpg  책마다 하나 (ISBN이 없으면 <ID>.jpg)
-//   data/og/<slug>/site.jpg    서가 첫 화면용. sites/*.json의 shareBook(ISBN 또는 ID)이 있으면 그 책, 없으면 신간(진열대 가운데 책과 같은 규칙)
+//   data/og/<slug>/site.jpg    서가 첫 화면용. sites/*.json의 leadBook(ISBN 또는 ID)이 있으면 그 책, 없으면 신간(진열대 가운데 책과 같은 규칙)
 // 배포(GitHub Actions)에는 브라우저가 없어서, 표지처럼 여기서 만들어 data/og에 넣어 두고 build는 복사만 한다.
 // 바뀐 책만 다시 찍는다(그림에 들어가는 글·표지·디자인이 같으면 건너뜀).
 //

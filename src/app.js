@@ -36,8 +36,10 @@ const RECENT = SITE.recentCount ? ALL.slice().sort(newestFirst).slice(0, SITE.re
   : ALL.filter(b => b.y > NEWEST - (SITE.recentYears || 2)).sort(newestFirst);
 let BOOKS = [...RECENT, ...ALL.filter(b => b.feat && !RECENT.includes(b)).sort(newestFirst)];
 if (BOOKS.length < 8) BOOKS = ALL.slice().sort(newestFirst); // 책이 적은 서가는 진열대에 전부 꽂는다
+// 첫 화면 가운데 책: 대표 책(SITE.lead, sites/*.json leadBook)이 있으면 그 책, 없으면 가장 최근 책 (2026-11-08)
+if (SITE.lead && BYID.has(SITE.lead) && !BOOKS.some(b => b.id === SITE.lead)) BOOKS.unshift(BYID.get(SITE.lead));
 const N = BOOKS.length, COPIES = Math.max(2, Math.ceil(30 / N)), TOT = N * COPIES, P = 1400;
-const START = 0;
+const START = SITE.lead ? Math.max(0, BOOKS.findIndex(b => b.id === SITE.lead)) : 0;
 const $ = id => document.getElementById(id);
 const mod = (a, n) => ((a % n) + n) % n;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

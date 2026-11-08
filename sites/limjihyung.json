@@ -15,6 +15,7 @@
   "favicon": "📚",
   "note": "책 정보와 표지는 출판사 및 서점 자료 기준",
   "draft": false,
+  "runner": true,
   "url": "https://gloryfactory-hash.github.io/bookshelf/limjihyung/",
   "about": {
     "photo": "data/media/limjihyung/marathon.jpg",

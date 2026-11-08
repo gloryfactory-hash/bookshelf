@@ -46,7 +46,7 @@ const RM = matchMedia('(prefers-reduced-motion: reduce)');
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 
-const stage = $('stage'), shelf = $('shelf'), probe = $('probe'), ring = $('ring');
+const stage = $('stage'), shelf = $('shelf'), probe = $('probe');
 const detail = $('detail'), lib = $('lib'), dot = $('dot'), tl = $('tl');
 $('navN').textContent = ALL.length; $('libN').textContent = ALL.length + '권';
 
@@ -126,7 +126,23 @@ function setCaption(i, dir) {
 let s = START + N, T = s, last = performance.now();
 let active = -1, dragging = false, hovered = null;
 let mx = innerWidth / 2, my = innerHeight / 2;
-let tiltX = 0, tiltY = 0, dotY = tOf(BOOKS[START]), ringScale = 0;
+let tiltX = 0, tiltY = 0, dotY = tOf(BOOKS[START]);
+/* 트랙 위 작가 (2026-11-08, 시안/track_v1 나). SITE.runner인 서가만. 움직이면 달리기(땀방울), 멈춘 뒤 손 흔들기, 그다음 서기.
+   서 있으면 5초쯤 뒤 스트레칭(만세 / 다리 잡기 번갈아), 그다음 7~12초 뒤 화면 보고 하트 … 한 번 들어와서 여섯 번까지(하트는 세 번). 옛날 책 쪽으로 가면 몸을 돌린다. */
+const RUN = !!SITE.runner;
+let rnPrev = dotY, rnLast = performance.now() - 150, rnDir = 1, rnSt = '', rnD0 = 0, rnAct = '', rnNext = 0, rnEnd = 0, rnCnt = 0;
+if (RUN) dot.append(el('i', 'sw'), el('i', 'rn'), el('i', 'ht'));
+function runner(now) {
+  const v = dotY - rnPrev; rnPrev = dotY;
+  if (Math.abs(v) > 2e-3) { if (Math.abs(v) < 3) rnDir = v > 0 ? 1 : -1; rnLast = now; }
+  let st = now - rnLast < 140 ? 'run' : now - rnLast < 1500 ? 'wave' : 'stand';
+  if (st !== 'stand' || RM.matches) { rnAct = ''; rnNext = 0; }
+  else if (rnAct && now < rnEnd) st = rnAct;
+  else if (rnAct) { rnAct = ''; rnNext = now + 7000 + Math.random() * 5000; }
+  else if (!rnNext) rnNext = now + 4500 + Math.random() * 2000;
+  else if (now > rnNext && rnCnt < 6) { rnAct = rnCnt % 2 ? 'heart' : (rnCnt % 4 ? 'strB' : 'strA'); rnEnd = now + (rnAct === 'heart' ? 2000 : 1800); rnCnt++; st = rnAct; }
+  if (st !== rnSt || rnDir !== rnD0) { rnSt = st; rnD0 = rnDir; dot.className = 'dot ' + st + (rnDir < 0 ? ' l' : ''); }
+}
 let view = 'shelf', openId = null, inkT0 = 0, inkFast = false;
 const overlay = () => view !== 'shelf' || openId !== null;
 const activeTape = () => tapes[mod(Math.round(s), TOT)];
@@ -176,15 +192,11 @@ function frame(now) {
       t.sp.style.setProperty('--shade', Math.min(.6, o * .55 + (1 - sc) * .32).toFixed(3));
       t.cv.style.setProperty('--shade', ((1 - o) * .82).toFixed(3));
     }
-    const rWant = shelfLive ? smooth(Math.max(0, 1 - Math.abs(T - s) * 3)) : 0;
-    ringScale = RM.matches ? rWant : ringScale + (rWant - ringScale) * (1 - Math.exp(-10 * dt));
-    const pz = P / (P - H * .1);
-    ring.style.left = (W / 2 - dOpen / 2 * pz - 6) + 'px'; ring.style.top = (shelfC + .36 * H * pz) + 'px';
-    ring.style.transform = `scale(${ringScale.toFixed(3)})`;
     const i0 = Math.floor(s), f = s - i0, ya = tOf(BOOKS[mod(i0, N)]), yb = tOf(BOOKS[mod(i0 + 1, N)]);
     const yy = yb < ya ? (f < .5 ? ya : yb) : ya + (yb - ya) * f;
     if (Math.abs(yy - dotY) > 6 || RM.matches) dotY = yy; else dotY += (yy - dotY) * (1 - Math.exp(-14 * dt));
     dot.style.left = ((dotY - Y0) / (Y1 - Y0) * 100) + '%';
+    if (RUN) runner(now);
     // 따라다니는 원 대신 기본 화살표. 책 위에서는 손가락 모양(누를 수 있다는 표시)
     const want = dragging ? 'grabbing' : (onCover || hovered) ? 'pointer' : '';
     if (want !== ptrCur) { ptrCur = want; shelf.style.cursor = want; }
@@ -222,13 +234,15 @@ addEventListener('wheel', e => {
 }, { passive: false });
 $('prev').addEventListener('click', () => { T = Math.round(T) - 1; });
 $('next').addEventListener('click', () => { T = Math.round(T) + 1; });
-ring.addEventListener('click', () => openShelfBook());
 $('tlhit').addEventListener('click', e => {
   const r = tl.getBoundingClientRect(), t = Y0 + clamp((e.clientX - r.left) / r.width, 0, 1) * (Y1 - Y0);
   let best = 0, bd = 1e9; BOOKS.forEach((b, i) => { const d = Math.abs(tOf(b) - t); if (d < bd) { bd = d; best = i; } });
   T = Math.round(T) + mod(best - mod(Math.round(T), N) + Math.floor(N / 2), N) - Math.floor(N / 2);
 });
 function openShelfBook() { T = Math.round(T); go('b-' + BOOKS[mod(T, N)].id); }
+// 표지 아래 제목을 누르면 책 소개 (2026-11-08, '+' 동그라미 대신). 마우스를 올리면 주황 밑줄
+$('mTitle').addEventListener('click', () => { if (!overlay()) openShelfBook(); });
+$('mTitle').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (!overlay()) openShelfBook(); } });
 
 /* ---------- library ---------- */
 const F = { tgt: null, kw: null, series: null, q: '', sort: 'new' };
@@ -369,7 +383,7 @@ if (BYPATH) document.addEventListener('click', e => {
 const about = $('about');
 const PANELS = { lib, about };
 // 서고·작가 화면이 덮고 있을 때는 뒤의 진열대로 Tab이 가지 않게 한다.
-const BEHIND = ['shelf', 'prev', 'next', 'ring', 'gr'].map($).concat([...document.querySelectorAll('.foot')]);
+const BEHIND = ['shelf', 'prev', 'next', 'cap', 'gr'].map($).concat([...document.querySelectorAll('.foot')]);
 function showPanel(name, anchor) {
   BEHIND.forEach(n => n && (n.inert = name !== 'shelf'));
   $('navShelf').setAttribute('aria-pressed', String(name === 'shelf')); $('navLib').setAttribute('aria-pressed', String(name === 'lib'));
@@ -396,6 +410,11 @@ function jump(p, id, late) {
 }
 const ABOUT_HASH = ['about', 'talk', 'contact'];
 const back = () => view === 'lib' ? 'books' : view === 'about' ? 'about' : 'shelf';
+/* 닫기 (2026-11-08): 이름과 뜻(서가로 돌아가기)은 그대로. 카톡 링크처럼 책 주소로 바로 들어와 아직 서가를 본 적이 없으면
+   이름을 '전체 작품 보기'로 바꾸고 전체 작품(서고)을 연다. ← 화살표는 쓰지 않는다. */
+let seenHome = false;
+const closeTo = () => seenHome ? back() : 'books';
+const closeLabel = () => seenHome ? '닫기' : '전체 작품 보기';
 function route() {
   const h = curRoute();
   const ob = h.startsWith('b-') && BYID.get(h.slice(2));
@@ -403,6 +422,7 @@ function route() {
   if (BYPATH && ob && location.hash.startsWith('#')) history.replaceState(null, '', urlFor(h)); // 예전 '#b-…' 주소는 책 주소로 바꿔 준다
   if (h.startsWith('b-') && BYID.has(h.slice(2))) { openDetail(BYID.get(h.slice(2))); return; }
   if (openId !== null) closeDetail();
+  seenHome = true;
   view = h === 'books' ? 'lib' : (about && ABOUT_HASH.includes(h)) ? 'about' : 'shelf';
   showPanel(view, view === 'about' && h !== 'about' ? h : null);
   if (view === 'shelf' && booted) shelf.focus({ preventScroll: true });
@@ -410,7 +430,6 @@ function route() {
 let booted = false;
 $('navShelf').addEventListener('click', () => go('shelf'));
 $('navLib').addEventListener('click', () => go('books'));
-$('footLib').addEventListener('click', () => go('books'));
 if ($('navAbout')) $('navAbout').addEventListener('click', () => go('about'));
 // 작가 화면의 '연계 도서'에서 시리즈를 누르면 서고를 그 시리즈로 걸러 연다.
 if (about) about.addEventListener('click', e => {
@@ -458,11 +477,13 @@ function fillDetail(b) {
   row('출판사', b.pub);
   if (b.isbn) row('ISBN', el('span', 'isbn', b.isbn), isbnCopyBtn(b.isbn));
   bib.append(el('h3', null, '도서 정보'), dl);
-  const buy = $('dBuy'); buy.textContent = '';
+  // 서점 한 줄 (2026-11-08): YES24 | 교보문고 | 알라딘 같은 너비로. 첫째는 채운 단추. 링크가 없는 서점은 빠지고 남은 칸이 너비를 나눈다
+  const buy = $('dBuy'), shops = el('div', 'shops'); buy.textContent = '';
   for (const [k, label] of [['yes24', 'YES24'], ['kyobo', '교보문고'], ['aladin', '알라딘']]) {
     const u = b.links[k]; if (!u || !/^https:\/\//.test(u)) continue;
-    const a = el('a', null, label + '에서 보기'); a.href = u; a.target = '_blank'; a.rel = 'noopener'; buy.append(a);
+    const a = el('a', null, label); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', label + '에서 보기 (새 창)'); shops.append(a);
   }
+  if (shops.children.length) buy.append(el('h3', null, '서점에서 보기'), shops);
   const ph = 474 / b.a;
   poster.setAttribute('viewBox', `0 0 474 ${ph.toFixed(1)}`); pcr.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('href', b.img);
   circles.forEach(([x, y], k) => { circEls[k].setAttribute('cx', x); circEls[k].setAttribute('cy', (y * ph / 900).toFixed(1)); circEls[k].setAttribute('r', 0); });
@@ -497,7 +518,9 @@ function openDetail(b) {
     n.getAnimations().forEach(a => a.cancel());
     n.animate([{ transform: 'translateY(110%)' }, { transform: 'translateY(0)' }], { duration: fast ? 1 : (inkFast ? 600 : 900), delay: fast ? 0 : lead + k * (inkFast ? 45 : 75), easing: EASE, fill: 'both' });
   });
-  setTimeout(() => $('close').focus({ preventScroll: true }), fast ? 0 : 350);
+  $('close').textContent = $('closeB').textContent = closeLabel();
+  // 컴퓨터는 닫기에 초점(키보드로 바로 닫기). 휴대폰은 위 단추를 숨기고 아래 고정 줄을 쓰므로, 아래 단추가 눌린 것처럼 보이지 않게 상세 화면 자체에 초점을 둔다
+  setTimeout(() => ($('close').offsetParent ? $('close') : detail).focus({ preventScroll: true }), fast ? 0 : 350);
 }
 function closeDetail() {
   if (openId === null) return;
@@ -507,24 +530,34 @@ function closeDetail() {
   an.onfinish = () => { if (openId !== null) return; detail.hidden = true; detail.getAnimations().forEach(a => a.cancel()); detail.querySelectorAll('.m > *').forEach(n => n.getAnimations().forEach(a => a.cancel())); };
   if (lastFocus && document.contains(lastFocus) && lastFocus !== document.body) lastFocus.focus({ preventScroll: true });
 }
-$('close').addEventListener('click', () => go(back()));
+for (const id of ['close', 'closeB']) $(id).addEventListener('click', () => go(closeTo()));
 // ISBN 복사: 숫자 13자리만 복사하고 2초 동안 '복사했어요' ('주소 복사'와 같은 단추)
 function isbnCopyBtn(isbn) {
   const bt = el('button', 'box lbl icopy', '복사'); bt.type = 'button'; bt.setAttribute('aria-label', 'ISBN ' + isbn + ' 복사');
   bt.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(isbn); } catch { prompt('이 ISBN을 복사하세요', isbn); return; }
-    bt.textContent = '복사했어요'; bt.classList.add('done');
-    clearTimeout(bt._t); bt._t = setTimeout(() => { bt.textContent = '복사'; bt.classList.remove('done'); }, 2000);
+    bt.textContent = '복사했어요'; bt.classList.add('copied');
+    clearTimeout(bt._t); bt._t = setTimeout(() => { bt.textContent = '복사'; bt.classList.remove('copied'); }, 2000);
   });
   return bt;
 }
-// '주소 복사': 지금 책의 주소를 복사하고 2초 동안 '복사했어요'. 글자만 바뀐다. (2026-11-08)
-$('share').addEventListener('click', async () => {
-  const bt = $('share'), b = openId !== null && BYID.get(openId);
-  const addr = b && BYPATH ? location.origin + urlFor('b-' + b.id) : location.href;
+// '주소 복사'(컴퓨터 위 단추): 지금 책의 주소를 복사하고 2초 동안 '복사했어요'. 글자만 바뀐다. (2026-11-08)
+// '공유'(휴대폰 아래 줄): 휴대폰 공유 창(카톡·문자로 바로 보내기). 공유 창이 없는 브라우저는 주소 복사.
+const bookAddr = () => { const b = openId !== null && BYID.get(openId); return b && BYPATH ? location.origin + urlFor('b-' + b.id) : location.href; };
+async function copyAddr(bt, label) {
+  const addr = bookAddr();
   try { await navigator.clipboard.writeText(addr); } catch { prompt('이 주소를 복사하세요', addr); return; }
-  bt.textContent = '복사했어요'; bt.classList.add('done');
-  clearTimeout(bt._t); bt._t = setTimeout(() => { bt.textContent = '주소 복사'; bt.classList.remove('done'); }, 2000);
+  bt.textContent = '복사했어요'; bt.classList.add('copied');
+  clearTimeout(bt._t); bt._t = setTimeout(() => { bt.textContent = label; bt.classList.remove('copied'); }, 2000);
+}
+$('share').addEventListener('click', () => copyAddr($('share'), '주소 복사'));
+$('shareB').addEventListener('click', async () => {
+  const b = openId !== null && BYID.get(openId);
+  if (navigator.share) {
+    try { await navigator.share({ title: b ? `${b.title} · ${SITE.author}` : document.title, url: bookAddr() }); } catch (_) { /* 닫거나 취소함 */ }
+    return;
+  }
+  copyAddr($('shareB'), '공유');
 });
 detail.addEventListener('keydown', e => {
   if (e.key !== 'Tab') return;
@@ -534,7 +567,7 @@ detail.addEventListener('keydown', e => {
   else if (!e.shiftKey && document.activeElement === z) { a.focus(); e.preventDefault(); }
 });
 addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (openId !== null) go(back()); else if (view !== 'shelf') go('shelf'); return; }
+  if (e.key === 'Escape') { if (openId !== null) go(closeTo()); else if (view !== 'shelf') go('shelf'); return; }
   if (overlay()) return;
   if (e.target.closest && e.target.closest('input,select')) return;
   if (e.key === 'ArrowLeft') { T = Math.round(T) - 1; e.preventDefault(); }
@@ -543,6 +576,7 @@ addEventListener('keydown', e => {
 });
 
 /* ---------- boot ---------- */
+document.addEventListener('touchstart', () => {}, { passive: true }); // 아이폰 사파리에서 누르는 동안 모양(:active)이 보이게
 measure();
 addEventListener('resize', measure);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);

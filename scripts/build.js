@@ -10,6 +10,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import subsetFont from 'subset-font';
+import { sheetSvg, sweatSvg, heartSvg, FW, FH, ORDER } from './sprite.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const P = (...p) => path.join(root, ...p);
@@ -128,7 +129,7 @@ for (const site of sites) {
     const r = await sharp(P(site.about.photo)).rotate().resize({ height: 1200, withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(out, 'assets', 'author.webp'));
     photo = { file: 'author.webp', w: r.width, h: r.height };
   }
-  const siteData = { author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
+  const siteData = { runner: !!site.runner, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl
     .replaceAll('{{TITLE}}', esc(site.title))
     .replaceAll('{{DESCRIPTION}}', esc(site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`))
@@ -138,6 +139,7 @@ for (const site of sites) {
     .replaceAll('{{KAN_L}}', esc(site.kan?.[0] || ''))
     .replaceAll('{{KAN_R}}', esc(site.kan?.[1] || ''))
     .replaceAll('{{ME}}', site.color === 'green' ? 'green' : 'orange')
+    .replaceAll('{{RUNNER}}', site.runner ? ' data-runner' : '') // 트랙 위 도트 캐릭터 (2026-11-08). 지금은 임지형 서가만
     .replaceAll('{{CHANNEL}}', esc(CH.name))
     .replaceAll('{{YOUTUBE}}', esc(CH.youtube))
     .replaceAll('{{NEWS}}', esc(CH.news))
@@ -190,6 +192,13 @@ for (const site of sites) {
   await serifSubset(html.replace(/<[^>]+>/g, ''), path.join(out, 'assets', 'fonts'));
   fs.writeFileSync(path.join(out, 'assets', 'style.css'), css);
   fs.writeFileSync(path.join(out, 'assets', 'app.js'), app);
+  // 트랙 위 작가 도트 캐릭터 그림 (scripts/sprite.js). style.css의 칸 위치 값은 14×16칸 × 2배, ORDER 순서에 맞춰 적어 두었다
+  if (site.runner) {
+    if (FW !== 14 || FH !== 16 || ORDER.join() !== 'run1,run2,run3,run4,stand,wave1,wave2,strA1,strA2,strB,front,kiss') throw new Error('sprite.js의 칸 크기나 순서가 바뀌었습니다. style.css의 캐릭터 위치 값도 함께 고치세요.');
+    fs.writeFileSync(path.join(out, 'assets', 'runner.svg'), sheetSvg());
+    fs.writeFileSync(path.join(out, 'assets', 'sweat.svg'), sweatSvg());
+    fs.writeFileSync(path.join(out, 'assets', 'heart.svg'), heartSvg());
+  }
   built.push(site);
   console.log(`[${site.slug}] ${list.length}권 → dist/${site.slug}/` + (small ? `  (세로 700px 미만 표지 ${small}장: 큰 표지로 바꾸면 상세 화면이 선명해집니다)` : ''));
 }

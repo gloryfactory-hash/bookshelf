@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" data-me="{{ME}}">
+<html lang="ko" data-me="{{ME}}"{{RUNNER}}>
 <head>
 <meta charset="utf-8">
 {{BASE}}
@@ -13,7 +13,7 @@
 </head>
 <body class="noselect">
 <header class="top">
-  <div class="brand"><a class="bb" href="{{YOUTUBE}}" target="_blank" rel="noopener" aria-label="{{CHANNEL}} 유튜브 채널">{{CHANNEL}}</a><span class="sep" aria-hidden="true"></span><nav class="who" aria-label="작가 서가">{{WHO}}</nav></div>
+  <div class="brand"><span class="bb">{{CHANNEL}}</span><span class="sep" aria-hidden="true"></span><nav class="who" aria-label="작가 서가">{{WHO}}</nav></div>
   <nav class="nav" aria-label="보기 전환">
     <button id="navShelf" aria-pressed="true">대표작·신간</button>
     <button id="navLib" aria-pressed="false">전체 작품<span class="n" id="navN"></span></button>
@@ -31,10 +31,9 @@
 <section class="shelf" id="shelf" tabindex="0" aria-label="대표작과 신간 책장. 왼쪽, 오른쪽 화살표 키로 넘기고 Enter로 책 소개를 엽니다.">
   <div class="stage" id="stage"></div>
 </section>
-<button class="ring" id="ring" aria-label="책 소개 열기" tabindex="-1"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0v12M0 6h12" stroke="currentColor" stroke-width="1.3"/></svg></button>
 
 <div class="cap" id="cap" aria-live="polite">
-  <div class="m" id="mTitle"></div>
+  <div class="m" id="mTitle" role="button" tabindex="0"></div>
   <div class="m" id="mSub"></div>
   <div class="crule"></div>
   <div class="m" id="mYear"></div>
@@ -43,11 +42,11 @@
 <button class="arrow next" id="next" aria-label="다음 책"><svg viewBox="0 0 24 12" aria-hidden="true"><path d="M18 1l5 5-5 5M23 6H0" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>
 
 <nav class="gr" id="gr" aria-label="학년으로 찾기"><p class="gl">학년으로 찾기</p><div class="gb" id="grb"></div></nav>
-<div class="tl" id="tl" aria-hidden="true"><div class="base"></div><div class="dot" id="dot"></div><div class="hit" id="tlhit"></div></div>
+<div class="tl" id="tl" aria-hidden="true"><div class="start"><b>3</b><b>2</b><b>1</b></div><div class="base"></div><div class="dot" id="dot"></div><div class="hit" id="tlhit"></div></div>
 
 <footer class="foot lbl">
   <span>© {{AUTHOR}} · {{CHANNEL}}</span>
-  <div class="fr"><a class="news" href="{{NEWS}}" target="_blank" rel="noopener">새 책 소식 받기</a>{{FOOT_TALK}}<button id="footLib">전체 작품 보기</button></div>
+  <div class="fr"><a class="news" href="{{NEWS}}" target="_blank" rel="noopener">새 책 소식 받기</a>{{FOOT_TALK}}</div>
 </footer>
 
 <section class="lib" id="lib" hidden aria-label="전체 작품">
@@ -74,7 +73,7 @@
 
 {{ABOUT}}
 
-<section class="detail" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="dTitle">
+<section class="detail" id="detail" hidden tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <div class="dhead"><span class="dact"><button class="close box lbl" id="close">닫기</button><button class="box lbl share" id="share" type="button">주소 복사</button></span><div class="dbrand lbl"><b>{{AUTHOR}}</b><span class="ln"></span><span>{{BRAND_SUB}}</span></div></div>
   <div class="dgrid">
     <div class="dtext" id="dtext">
@@ -103,6 +102,7 @@
     <div class="drel" id="dRelS" hidden><h3>같은 시리즈</h3><div class="row"></div></div>
     <div class="drel" id="dRelK" hidden><h3>비슷한 주제의 책</h3><div class="row"></div></div>
   </div>
+  <div class="dbar"><button class="box lbl" id="closeB" type="button">닫기</button><button class="box lbl" id="shareB" type="button">공유</button></div>
 </section>
 
 

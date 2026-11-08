@@ -330,6 +330,19 @@ button{background:none;border:0;padding:0}
 .arun{position:relative;margin-top:52px;padding-top:46px}
 .arun::before{content:"";position:absolute;left:0;right:0;top:0;height:24px;border-radius:3px;background:
   linear-gradient(#fff,#fff) 0 7px/100% 1.5px no-repeat,linear-gradient(#fff,#fff) 0 15px/100% 1.5px no-repeat,var(--me)}
+/* 작가 화면 트랙 위에서 계속 달리는 작가 (2026-11-09, 사용자 "눈금이 흐르며 계속 달리기"). runner가 켜진 서가만(build.js).
+   작가는 가운데보다 조금 오른쪽에 서서 달리고, 흰 눈금이 왼쪽으로 흘러 앞으로 나아가는 것처럼 보인다. 화면에 보일 때만(.go, app.js) 움직인다. */
+.artk{position:absolute;left:0;right:0;top:0;height:24px;border-radius:3px;overflow:hidden;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1.5px,transparent 1.5px 72px) 0 0/72px 100%}
+.arme{position:absolute;left:60%;top:-12px;width:28px;height:32px;margin-left:-14px;pointer-events:none}
+.arme::after{content:"";position:absolute;left:5px;right:5px;bottom:-1px;height:3px;border-radius:50%;background:rgba(0,0,0,.28)}
+.arme .rn{position:relative;z-index:1;display:block;width:28px;height:32px;background:url(runner.svg) -112px 0/336px 32px no-repeat;image-rendering:pixelated}
+.arme .sw{position:absolute;top:-2px;left:-16px;width:20px;height:16px;background:url(sweat.svg) 0 0/80px 16px no-repeat;image-rendering:pixelated;display:none}
+.arun.go .artk{animation:ar-tk .9s linear infinite}
+.arun.go .arme .rn{animation:rn-run .44s steps(4) infinite}
+.arun.go .arme .sw{display:block;animation:rn-sw .44s steps(4) infinite}
+@keyframes ar-tk{to{background-position:-72px 0}}
+@media (prefers-reduced-motion:reduce){.arun .artk,.arun .arme .rn{animation:none!important}.arun .arme .sw{display:none!important}}
 .arun h2,.asec h2{margin:0 0 14px;font-weight:700;font-size:var(--fs-2);letter-spacing:0;color:var(--muted)}
 .arun p{margin:0;font-family:var(--serif);font-weight:400;font-size:var(--fs-4);line-height:1.7;color:var(--ink)}
 .asec{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule)}

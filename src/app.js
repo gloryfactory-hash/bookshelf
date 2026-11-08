@@ -461,6 +461,10 @@ if (BYPATH) document.addEventListener('click', e => {
 // 서고(lib)와 작가 화면(about)은 진열대 위에 아래에서 올라오는 판이다. 한 번에 하나만 열린다.
 const about = $('about');
 const PANELS = { lib, about };
+// 작가 화면 트랙의 달리는 작가: 화면에 보일 때만 달린다(.go). 작가 화면이 닫혀 있으면 멈춘다 (2026-11-09)
+const arun = about && about.querySelector('.arun');
+if (arun && arun.querySelector('.arme') && 'IntersectionObserver' in window)
+  new IntersectionObserver(es => es.forEach(e => arun.classList.toggle('go', e.isIntersecting)), { root: about }).observe(arun);
 // 서고·작가 화면이 덮고 있을 때는 뒤의 진열대로 Tab이 가지 않게 한다.
 const BEHIND = ['shelf', 'prev', 'next', 'cap', 'gr'].map($).concat([...document.querySelectorAll('.foot')]);
 function showPanel(name, anchor) {

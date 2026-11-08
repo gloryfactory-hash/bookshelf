@@ -97,7 +97,7 @@ function aboutHtml(site, list, photo) {
       <p class="alead">${esc(a.lead)}</p>
       <ul class="astats">${stats.map(([n, l]) => `<li><b>${esc(n)}</b>${esc(l)}</li>`).join('')}</ul>
       <div class="abio">${(a.bio || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
-      ${a.run ? `<section class="arun"><h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
+      ${a.run ? `<section class="arun">${site.runner ? '<div class="artk" aria-hidden="true"></div><div class="arme" aria-hidden="true"><i class="sw"></i><i class="rn"></i></div>' : ''}<h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
       ${a.history ? `<section class="asec"><h2>걸어온 길</h2>${yrs(a.history)}${a.judging ? `<details class="judge"><summary>심사 이력 ${a.judging.length}건</summary>${yrs(a.judging)}</details>` : ''}</section>` : ''}
       ${talks ? `<section class="asec" id="talk"><h2>강연</h2>${a.talkIntro ? `<p class="anote">${esc(a.talkIntro)}</p>` : ''}<ul class="talks">${talks}</ul>${a.talkCareer ? '<ul class="career">' + a.talkCareer.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>` : ''}
       ${c.email || c.form ? `<section class="asec acontact" id="contact"><h2>강연·협업 문의</h2>${c.text ? `<p>${esc(c.text)}</p>` : ''}<div class="cbtn">${c.form ? `<a class="pri" href="${esc(c.form)}" target="_blank" rel="noopener">문의 폼 작성하기</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}</div><p class="ch">작가의 일상과 책 이야기는 유튜브 채널 <a href="${esc(CH.youtube)}" target="_blank" rel="noopener">${esc(CH.name)}</a>에서 만나요.</p></section>` : ''}

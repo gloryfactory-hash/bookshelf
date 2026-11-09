@@ -187,7 +187,7 @@ function frame(now) {
   if (shelfLive || Math.abs(T - s) > 1e-4) {
     s += (T - s) * (RM.matches ? 1 : (1 - Math.exp(-(dragging ? 18 : 5.2) * dt)));
     if (Math.abs(T - s) < 1e-4) s = T;
-    if (Math.abs(s) > N * 40) { const sh = Math.round(s / N) * N - N; s -= sh; T -= sh; }
+    if (Math.abs(s) > N * 40) { const sh = Math.round(s / N) * N - N; s -= sh; T -= sh; if (scrub) scrub.lap -= sh; }
     const ai = mod(Math.round(s), N);
     // 트랙을 끄는 동안은 표지 아래 글자가 위아래로 움직이지 않고 바로 바뀐다(빨리 끌 때 번쩍이지 않게)
     if (ai !== active) { const dir = active < 0 || scrub ? 0 : (Math.sign(T - s) || 1); active = ai; setCaption(ai, dir); }
@@ -271,11 +271,13 @@ function idxAt(t) {
   const [ta, ia] = TSORT[k], [tb, ib] = TSORT[k + 1], f = tb > ta ? clamp((t - ta) / (tb - ta), 0, 1) : 0;
   return Math.abs(ia - ib) === 1 ? ia + (ib - ia) * f : (f < .5 ? ia : ib);
 }
-function scrubTo(x) { scrub.t = tAt(x); const i = idxAt(scrub.t); T = i + N * Math.round((T - i) / N); }
+// 트랙은 곧은 줄이라 책장도 한 바퀴를 넘지 않고 그 책까지 곧장 간다(짧은 쪽으로 돌면 최신 책을 거쳐 가서 작가가 잠깐 반대로 달렸다. 2026-11-09)
+function scrubTo(x) { scrub.t = tAt(x); T = scrub.lap + idxAt(scrub.t); }
 tlhit.addEventListener('pointerdown', e => {
   if (overlay() || e.button > 0) return;
   e.preventDefault();
-  scrub = { id: e.pointerId, t: dotY }; dragging = true; tl.classList.add('on');
+  const c = Math.round(s);
+  scrub = { id: e.pointerId, t: dotY, lap: c - mod(c, N) }; dragging = true; tl.classList.add('on');
   try { tlhit.setPointerCapture(e.pointerId); } catch (_) {}
   scrubTo(e.clientX);
 });

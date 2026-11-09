@@ -318,8 +318,18 @@ button{background:none;border:0;padding:0}
 /* 작가 화면 */
 .ain{max-width:1240px;margin:0 auto;padding:calc(112px + env(safe-area-inset-top,0px)) 36px 80px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:6vw;align-items:start}
 .aphoto{position:sticky;top:112px;margin:0}
-.aphoto img{display:block;width:100%;height:auto;max-height:calc(100vh - 180px);object-fit:cover;object-position:50% 35%;border-radius:2px}
-.aphoto figcaption{margin-top:10px;font-size:var(--fs-1);line-height:1.5;color:var(--muted)}
+/* 왼쪽 사진은 읽는 자리(소개·달리기·강연)에 따라 바뀐다. 새 사진이 아래(거꾸로 읽으면 위)에서부터 덮으며 드러난다(clip-path). 2026-11-09 */
+.aframe{position:relative;width:min(100%, calc((100vh - 180px) * 2 / 3));aspect-ratio:2/3;overflow:hidden;border-radius:2px;background:var(--rule)}
+.aframe img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 35%;clip-path:inset(100% 0 0 0);transition:clip-path .7s cubic-bezier(.7,0,.2,1)}
+.aframe img.prev{z-index:1;clip-path:inset(0);transition:none}
+.aframe img.on{z-index:2;clip-path:inset(0)}
+.aphoto figcaption,.aphoto-m figcaption,.tphotos figcaption{margin-top:10px;font-size:var(--fs-1);line-height:1.5;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.aframe img{transition:none}}
+/* 휴대폰에서만 쓰는 사진(달리기 꼭지 위 사진, 강연 사진 줄의 첫 장) */
+.aphoto-m,.tphotos .m{display:none}
+.tphotos{margin:18px 0 24px}
+.tphotos figure{margin:0}
+.tphotos img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:2px}
 .atext{max-width:640px;padding-top:2vh;word-break:keep-all}
 .akick{margin:0 0 18px;font-weight:700;font-size:var(--fs-1);letter-spacing:0;color:var(--accent)}
 .aquote{margin:0;font-family:var(--serif);font-weight:700;font-size:var(--fs-6);line-height:1.32;letter-spacing:0;color:var(--ink);text-wrap:balance}
@@ -453,7 +463,15 @@ button{background:none;border:0;padding:0}
   .foot .fr>a{height:36px}
   .ain{grid-template-columns:1fr;gap:26px;padding:calc(80px + env(safe-area-inset-top,0px)) 16px 60px}
   .aphoto{position:relative;top:auto}
-  .aphoto img{max-height:60svh}
+  .aframe{width:100%;max-height:60svh}
+  .aframe img:not(:first-child){display:none}
+  .aframe img:first-child{clip-path:none}
+  .aphoto-m{display:block;margin:44px 0 0}
+  .aphoto-m img{display:block;width:100%;height:auto;max-height:70svh;object-fit:cover;object-position:50% 35%;border-radius:2px}
+  .tphotos{display:flex;gap:10px;margin:16px -16px 22px;padding:0 16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:16px;scrollbar-width:none}
+  .tphotos::-webkit-scrollbar{display:none}
+  .tphotos figure{flex:0 0 84%;scroll-snap-align:start}
+  .tphotos .m{display:block}
   .aquote{font-size:var(--fs-5)}
   .arun p{font-size:var(--fs-3)}
   .yl li{grid-template-columns:5.6em 1fr;gap:12px;font-size:var(--fs-2)}

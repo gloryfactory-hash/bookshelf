@@ -20,8 +20,15 @@
   "url": "https://limjh.kr/",
   "verify": { "naver": "698a70416fc70b05fec9928d02260499a7171e4e" },
   "about": {
-    "photo": "data/media/limjihyung/marathon.jpg",
-    "photoAlt": "하와이 호놀룰루 마라톤 풀코스를 달리는 임지형 작가",
+    "photos": [
+      { "src": "data/media/limjihyung/portrait.jpg", "alt": "임지형 작가", "at": "intro" },
+      { "src": "data/media/limjihyung/marathon.jpg", "alt": "하와이 호놀룰루 마라톤 풀코스를 달리는 임지형 작가", "at": "run" },
+      { "src": "data/media/limjihyung/talk.jpg", "alt": "초등학교 작가와의 만남에서 아이들에게 이야기하는 임지형 작가", "at": "talk" }
+    ],
+    "talkPhotos": [
+      { "src": "data/media/limjihyung/talk-wide.jpg", "alt": "초등학교 작가와의 만남에서 아이들에게 이야기하는 임지형 작가", "mobileOnly": true },
+      { "src": "data/media/limjihyung/sign.jpg", "alt": "강연을 마치고 아이의 책에 사인하는 임지형 작가" }
+    ],
     "quote": "동화는 아이들에게는 성장제, 어른들에게는 치료제예요.",
     "lead": "아이의 하루를 아이의 눈높이로 들여다보는 이야기꾼, 임지형 작가예요.",
     "debut": 2008,

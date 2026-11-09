@@ -88,18 +88,24 @@ function aboutHtml(site, list, photo) {
   // 숫자 한 줄 (2026-11-08 의견서): 권수와 기관 선정·추천을 받은 책 수는 자료에서 센다(학년·주제 페이지와 같은 기준). 등단 해는 about.debut.
   const recN = list.filter(b => b.rec.some(x => !NOT_REC.test(x))).length;
   const stats = [[list.length, '권의 책'], ...(recN ? [[recN, '권 기관 선정·추천']] : []), ...(a.debut ? [[a.debut, '년 등단']] : [])];
+  // 사진 (2026-11-09): 컴퓨터에서는 왼쪽 사진이 읽는 자리(소개·달리기·강연)에 따라 바뀐다(app.js).
+  // 휴대폰에서는 위에 첫 사진만 두고, 나머지는 그 꼭지 안에 넣는다(.aphoto-m, 강연 사진 줄).
+  const img = (p, lazy = true) => `<img src="assets/${p.file}" width="${p.w}" height="${p.h}" alt="${esc(p.alt)}"${lazy ? ' loading="lazy"' : ''} decoding="async">`;
+  const side = photo.side;
+  const inline = at => side.filter(p => p.at === at).map(p => `<figure class="aphoto-m">${img(p)}<figcaption>${esc(p.alt)}</figcaption></figure>`).join('');
+  const strip = photo.talk.length ? `<div class="tphotos">${photo.talk.map(p => `<figure${p.mobileOnly ? ' class="m"' : ''}>${img(p)}<figcaption>${esc(p.alt)}</figcaption></figure>`).join('')}</div>` : '';
   return `<section class="about" id="about" hidden aria-labelledby="aTitle">
   <div class="ain">
-    ${photo ? `<figure class="aphoto"><img src="assets/${photo.file}" width="${photo.w}" height="${photo.h}" alt="${esc(a.photoAlt || '')}" loading="lazy" decoding="async"><figcaption>${esc(a.photoAlt || '')}</figcaption></figure>` : ''}
+    ${side.length ? `<figure class="aphoto"><div class="aframe">${side.map((p, i) => img(p, i > 0).replace('<img ', `<img data-at="${esc(p.at || 'intro')}"${i ? '' : ' class="on"'} `)).join('')}</div><figcaption>${esc(side[0].alt)}</figcaption></figure>` : ''}
     <div class="atext">
       <p class="akick">작가 소개</p>
       <h1 class="aquote" id="aTitle">“${esc(a.quote)}”</h1>
       <p class="alead">${esc(a.lead)}</p>
       <ul class="astats">${stats.map(([n, l]) => `<li><b>${esc(n)}</b>${esc(l)}</li>`).join('')}</ul>
       <div class="abio">${(a.bio || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
-      ${a.run ? `<section class="arun">${site.runner ? '<div class="artk" aria-hidden="true"></div><div class="arme" aria-hidden="true"><i class="sw"></i><i class="rn"></i></div>' : ''}<h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
+      ${a.run ? `${inline('run')}<section class="arun">${site.runner ? '<div class="artk" aria-hidden="true"></div><div class="arme" aria-hidden="true"><i class="sw"></i><i class="rn"></i></div>' : ''}<h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
       ${a.history ? `<section class="asec"><h2>걸어온 길</h2>${yrs(a.history)}${a.judging ? `<details class="judge"><summary>심사 이력 ${a.judging.length}건</summary>${yrs(a.judging)}</details>` : ''}</section>` : ''}
-      ${talks ? `<section class="asec" id="talk"><h2>강연</h2>${a.talkIntro ? `<p class="anote">${esc(a.talkIntro)}</p>` : ''}<ul class="talks">${talks}</ul>${a.talkCareer ? '<ul class="career">' + a.talkCareer.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>` : ''}
+      ${talks ? `<section class="asec" id="talk"><h2>강연</h2>${a.talkIntro ? `<p class="anote">${esc(a.talkIntro)}</p>` : ''}${strip}<ul class="talks">${talks}</ul>${a.talkCareer ? '<ul class="career">' + a.talkCareer.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>` : ''}
       ${c.email || c.form ? `<section class="asec acontact" id="contact"><h2>강연·협업 문의</h2>${c.text ? `<p>${esc(c.text)}</p>` : ''}<div class="cbtn">${c.form ? `<a class="pri" href="${esc(c.form)}" target="_blank" rel="noopener">문의 폼 작성하기</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}</div><p class="ch">작가의 일상과 책 이야기는 유튜브 채널 <a href="${esc(CH.youtube)}" target="_blank" rel="noopener">${esc(CH.name)}</a>에서 만나요.</p></section>` : ''}
       <div class="libfoot lbl"><span>© ${esc(site.author)} · ${esc(CH.name)}</span><a href="${esc(CH.news)}" target="_blank" rel="noopener">새 책 소식 받기</a></div>
     </div>
@@ -223,11 +229,17 @@ for (const site of sites) {
   // 글꼴(페이퍼로지는 통째로, 부크크 명조는 줄여서)과 작가 사진
   fs.mkdirSync(path.join(out, 'assets', 'fonts'), { recursive: true });
   for (const f of fs.readdirSync(P('src', 'fonts'))) if (f.startsWith('Paperlogy')) fs.copyFileSync(P('src', 'fonts', f), path.join(out, 'assets', 'fonts', f));
-  let photo = null;
-  if (site.about?.photo) {
-    const r = await sharp(P(site.about.photo)).rotate().resize({ height: 1200, withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(out, 'assets', 'author.webp'));
-    photo = { file: 'author.webp', w: r.width, h: r.height };
-  }
+  // 작가 사진 (2026-11-09): photos는 왼쪽에 붙은 사진 묶음(읽는 자리에 따라 바뀜), talkPhotos는 강연 꼭지의 사진 줄.
+  // 예전 설정(photo 하나)도 그대로 읽는다. 아이 얼굴은 data/media에 넣기 전에 가리거나 잘라 낸다.
+  const ab = site.about || {};
+  const srcPhotos = ab.photos || (ab.photo ? [{ src: ab.photo, alt: ab.photoAlt || '', at: 'intro' }] : []);
+  const pic = async (p, name, size) => {
+    const r = await sharp(P(p.src)).rotate().resize({ ...size, withoutEnlargement: true }).webp({ quality: 80 }).toFile(path.join(out, 'assets', name));
+    return { ...p, file: name, w: r.width, h: r.height };
+  };
+  const photo = { side: [], talk: [] };
+  for (const [i, p] of srcPhotos.entries()) photo.side.push(await pic(p, `author-${i + 1}.webp`, { height: 1200 }));
+  for (const [i, p] of (ab.talkPhotos || []).entries()) photo.talk.push(await pic(p, `talk-${i + 1}.webp`, { width: 1200 }));
   const pages = landingPages(site, list);
   const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl

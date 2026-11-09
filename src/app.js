@@ -467,6 +467,43 @@ const PANELS = { lib, about };
 const arun = about && about.querySelector('.arun');
 if (arun && arun.querySelector('.arme') && 'IntersectionObserver' in window)
   new IntersectionObserver(es => es.forEach(e => arun.classList.toggle('go', e.isIntersecting)), { root: about }).observe(arun);
+// 작가 화면 왼쪽 사진: 읽는 자리에 따라 소개 → 달리기 → 강연 사진으로 바뀐다. 컴퓨터 화면에서만(휴대폰은 꼭지 안에 사진을 둔다) (2026-11-09)
+const aframe = about && about.querySelector('.aframe');
+let aboutPhotoReset = null; // 작가 화면을 새로 열 때 움직임 없이 첫 사진으로 되돌린다
+if (aframe && aframe.children.length > 1) {
+  const imgs = [...aframe.querySelectorAll('img')], cap = aframe.parentNode.querySelector('figcaption');
+  const marks = { run: about.querySelector('.arun'), talk: about.querySelector('#talk') };
+  const WIDE = matchMedia('(min-width:768px)');
+  let cur = 0, raf = 0;
+  const setPhoto = (i, still) => {
+    if (i === cur) return;
+    const prev = imgs[cur], next = imgs[i], down = i < cur;
+    imgs.forEach(m => m.classList.remove('prev'));
+    prev.classList.remove('on'); prev.classList.add('prev');
+    if (still) { // 움직임 없이 바로 바꾼다
+      next.style.transition = 'none'; next.classList.add('on'); void next.offsetWidth; next.style.transition = '';
+    } else { // 앞으로 읽으면 아래에서, 거꾸로 읽으면 위에서부터 덮는다(움직임 줄이기 설정이면 CSS가 바로 바꾼다)
+      next.style.transition = 'none'; next.style.clipPath = down ? 'inset(0 0 100% 0)' : 'inset(100% 0 0 0)';
+      void next.offsetWidth; next.style.transition = ''; next.style.clipPath = '';
+      next.classList.add('on');
+    }
+    cur = i;
+    if (cap) cap.textContent = next.alt;
+  };
+  const pick = () => {
+    raf = 0;
+    if (!WIDE.matches) return setPhoto(0);
+    const line = innerHeight * .45;
+    let i = 0;
+    imgs.forEach((m, k) => { const el = marks[m.dataset.at]; if (el && el.getBoundingClientRect().top < line) i = k; });
+    setPhoto(i);
+  };
+  const warm = () => WIDE.matches && imgs.forEach(m => { if (m.loading === 'lazy') m.loading = 'eager'; }); // 덮일 사진을 미리 불러 둔다(가려진 사진은 lazy로는 안 불러옴)
+  const ask = () => { warm(); if (!raf) raf = requestAnimationFrame(pick); };
+  about.addEventListener('scroll', ask, { passive: true });
+  addEventListener('resize', ask);
+  aboutPhotoReset = () => { setPhoto(0, true); imgs.forEach(m => m.classList.remove('prev')); ask(); };
+}
 // 서고·작가 화면이 덮고 있을 때는 뒤의 진열대로 Tab이 가지 않게 한다.
 const BEHIND = ['shelf', 'prev', 'next', 'cap', 'gr'].map($).concat([...document.querySelectorAll('.foot')]);
 function showPanel(name, anchor) {
@@ -479,7 +516,7 @@ function showPanel(name, anchor) {
     if (on && k === 'lib') renderLib();
     if (on && was) { if (anchor) jump(p, anchor); continue; }
     if (on) {
-      p.hidden = false; p.scrollTop = 0; p.style.zIndex = 52; if (k === 'lib') foldChips();
+      p.hidden = false; p.scrollTop = 0; p.style.zIndex = 52; if (k === 'lib') foldChips(); if (k === 'about' && aboutPhotoReset) aboutPhotoReset();
       p.animate([{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: RM.matches ? 1 : 700, easing: 'cubic-bezier(.76,0,.18,1)' });
       if (anchor) jump(p, anchor, true);
     } else if (was) {

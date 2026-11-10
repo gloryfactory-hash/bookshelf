@@ -375,7 +375,7 @@ button{background:none;border:0;padding:0}
 .talks .with a{color:var(--ink);border-bottom:1px solid var(--rule)}
 .talks .with a:hover{color:var(--accent);border-color:currentColor}
 .career{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.career li{padding:5px 9px;border:1px solid var(--hair);font-size:var(--fs-1);line-height:1.4}
+.career li{padding:6px 11px;border:1px solid var(--hair);font-size:var(--fs-2);line-height:1.45} /* 강연 경력 12→14px (2026-11-11, 사용자 "작은 느낌") */
 .acontact p{margin:0;font-size:var(--fs-body);line-height:1.7}
 .cbtn{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px}
 .cbtn a{display:inline-flex;align-items:center;height:46px;padding:0 18px;border:1px solid var(--accent);color:var(--accent);font-weight:700;font-size:var(--fs-2)}
@@ -461,7 +461,7 @@ button{background:none;border:0;padding:0}
   /* 아래 단추는 두 칸 같은 너비(하나뿐이면 꽉 차게). 트랙·학년 단추는 그대로 두고 단추만 맨 아래로 조금 내린다 */
   .foot{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
   .foot .fr{width:100%;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
-  .foot .fr>a{height:36px}
+  .foot .fr>a{height:44px}
   .ain{grid-template-columns:1fr;gap:26px;padding:calc(80px + env(safe-area-inset-top,0px)) 16px 60px}
   .aphoto{position:relative;top:auto}
   .aframe{width:100%;max-height:60svh}
@@ -575,4 +575,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .active .tag button:focus-visible{background-color:var(--accent);color:var(--paper)}
 @media (prefers-reduced-motion:reduce){.arrow svg,.card .stack{transition:none}}
 /* 첫 화면에서 '전체 작품'이 살짝 눈에 들어오게(2026-11-11): 고르지 않았을 때 옅은 이름표 색 바탕 */
-.nav #navLib[aria-pressed="false"]{background:var(--chip);border-radius:3px}
+.nav:has(#navShelf[aria-pressed="true"]) #navLib{background:var(--chip);border-radius:3px} /* 첫 화면에서만 (2026-11-11 점검) */
+/* 점검 반영(2026-11-11, 시안/점검_2026-11-11/REVIEW.md): 누르는 자리 넓히기. 모양은 그대로, 보이지 않는 칸으로 넓힌다 */
+.box{height:34px;padding:0 12px}
+.box.lbl{font-size:var(--fs-2)}
+.box,.lrow a,.talks .with a,.active .tag button{position:relative}
+.box::before{content:"";position:absolute;inset:-5px -2px}
+.lrow ul a::before,.lrow h3 a::before{content:"";position:absolute;inset:-7px -4px}
+.talks .with a::before{content:"";position:absolute;inset:-11px -4px}
+.active .tag button::before{content:"";position:absolute;inset:-9px}

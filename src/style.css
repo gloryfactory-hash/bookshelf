@@ -23,6 +23,7 @@
   /* 글자 크기 6단계 (2026-11-08). 정보 12 / 단추·본문 작은 글 14 / 읽는 글 16.5 / 한줄평·소제목 22 / 캡션 제목 34 / 큰 제목 56~64.
      굵기는 500(본문·정보) 700(단추·이름표·제목) 900(서가 이름과 큰 제목). 한글 자간은 0, 연도 숫자만 조금 띄운다. */
   --fs-1:12px; --fs-2:14px; --fs-3:16.5px; --fs-4:22px; --fs-5:34px; --fs-6:clamp(34px,4.2vw,64px);
+  --fs-body:22px; /* 본문(책 소개·작가 소개·문의 안내) 전용. 휴대폰 18px (2026-11-10 사용자 결정) */
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -270,14 +271,14 @@ button{background:none;border:0;padding:0}
 .dhead .dbrand b{font-family:var(--kr);font-weight:700;font-size:var(--fs-2)}
 .dhead .dbrand .ln{width:40px;height:1px;background:currentColor}
 .dgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:5vw;padding:10px 6vw 70px 7vw;align-items:start}
-.dtext{display:grid;gap:18px;max-width:560px;padding-top:4vh}
+.dtext{display:grid;gap:18px;max-width:640px;padding-top:4vh}
 .dtext .m{justify-items:start}
-.dsub{font-family:var(--kr);font-weight:700;font-size:var(--fs-2);color:var(--accent);letter-spacing:0}
+.dsub{font-family:var(--kr);font-weight:700;font-size:var(--fs-3);color:var(--accent);letter-spacing:0}
 .dtitle{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-6);line-height:1.15;letter-spacing:0;color:var(--accent);text-wrap:balance;word-break:keep-all;padding-bottom:.06em}
 .done{margin:0;font-family:var(--kr);font-weight:500;font-size:var(--fs-4);line-height:1.5;color:var(--ink);word-break:keep-all}
 .dkw{display:flex;flex-wrap:wrap;gap:6px}
 .dkw button{height:28px;padding:0 10px;background:var(--chip);color:var(--accent);font-family:var(--kr);font-size:var(--fs-2)}
-.dsyn{margin:0;font-family:var(--serif);font-weight:400;font-size:var(--fs-3);line-height:1.85;max-width:34em;color:var(--ink);word-break:keep-all;}
+.dsyn{margin:0;font-family:var(--serif);font-weight:400;font-size:var(--fs-body);line-height:1.85;max-width:34em;color:var(--ink);word-break:keep-all;}
 .drec{display:grid;gap:8px}
 .drec h3,.drel h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-1);letter-spacing:0;color:var(--muted)}
 .drec ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
@@ -336,7 +337,7 @@ button{background:none;border:0;padding:0}
 .alead{margin:26px 0 0;font-weight:700;font-size:var(--fs-4);line-height:1.5;color:var(--accent)}
 .astats{list-style:none;margin:20px 0 6px;padding:0;display:flex;flex-wrap:wrap;gap:8px 28px;font-size:var(--fs-2);line-height:1.4;color:var(--muted)}
 .astats b{margin-right:2px;font-weight:700;font-size:var(--fs-4);color:var(--ink);font-feature-settings:"tnum"}
-.abio p{margin:14px 0 0;font-family:var(--serif);font-weight:400;font-size:var(--fs-3);line-height:1.85;max-width:34em}
+.abio p{margin:14px 0 0;font-family:var(--serif);font-weight:400;font-size:var(--fs-body);line-height:1.85;max-width:34em}
 .arun{position:relative;margin-top:52px;padding-top:46px}
 .arun::before{content:"";position:absolute;left:0;right:0;top:0;height:24px;border-radius:3px;background:
   linear-gradient(#fff,#fff) 0 7px/100% 1.5px no-repeat,linear-gradient(#fff,#fff) 0 15px/100% 1.5px no-repeat,var(--me)}
@@ -375,7 +376,7 @@ button{background:none;border:0;padding:0}
 .talks .with a:hover{color:var(--accent);border-color:currentColor}
 .career{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .career li{padding:5px 9px;border:1px solid var(--hair);font-size:var(--fs-1);line-height:1.4}
-.acontact p{margin:0;font-size:var(--fs-3);line-height:1.7}
+.acontact p{margin:0;font-size:var(--fs-body);line-height:1.7}
 .cbtn{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px}
 .cbtn a{display:inline-flex;align-items:center;height:46px;padding:0 18px;border:1px solid var(--accent);color:var(--accent);font-weight:700;font-size:var(--fs-2)}
 .cbtn a.pri{background:var(--me-deep);border-color:var(--me-deep);color:#fff}
@@ -443,7 +444,7 @@ button{background:none;border:0;padding:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 @media (max-width:767px){
-  :root{--H:min(62vw,36svh);--cy:39%}
+  :root{--H:min(62vw,36svh);--cy:39%;--fs-body:18px}
   .top{height:calc(60px + env(safe-area-inset-top,0px));padding-left:16px;padding-right:16px}
   .brand{gap:10px}.brand .ln{width:18px}.brand .lbl{display:none}
   .nav button{padding:0 9px;font-size:var(--fs-2)}
@@ -530,3 +531,26 @@ button{background:none;border:0;padding:0}
   .csub{display:none}
   .gr .gl{display:none}
 }
+
+/* 휴대폰 글자 키움 대응 (2026-11-10, 안드로이드 글꼴 크기·삼성 인터넷·페이스북 앱 브라우저. 1.5배까지 겹치지 않게).
+   머리줄은 줄바꿈 없이, 넘치면 '부부작당' → 권수 순서로 뺀다(app.js fitTop). 첫 화면은 app.js fitHome이 실제 높이를 재서
+   단추·트랙·학년 줄을 아래부터 쌓고, 모자라면 진열대 책을 줄인다(가안). 기본 글자 크기에서는 지금과 같다. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (max-width:767px){
+  .top,.top *{white-space:nowrap}
+  .top.t1 .brand .bb{display:none}
+  .top.t2 .nav .n{display:none}
+  .ttl{white-space:normal;width:calc(100vw - 32px);text-wrap:balance;word-break:keep-all}
+  .kan.off{display:none} /* 책을 줄여야 할 만큼 글자가 크면 배경 큰 글자가 캡션을 가려서 뺀다 */
+  .ctitle,.csub{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .cap{top:calc(var(--cy) + var(--H) / 2 + var(--capgap,4.2vh))}
+  .arrow{top:calc(var(--cy) + var(--H) / 2 + var(--capgap,4.2vh) - 6px)}
+  .gr button{height:auto;min-height:48px;padding:4px 2px}
+  .gr.g3 .gb{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tl .yr.hid{visibility:hidden}
+  .seg button .ag{white-space:normal;word-break:keep-all}
+  .tools{width:100%;flex-wrap:nowrap}
+  .search{flex:1;min-width:0}
+  .search input{width:100%}
+}
+@media (max-width:767px) and (max-height:700px){.csub{display:none}}

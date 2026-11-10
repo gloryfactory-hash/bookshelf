@@ -700,9 +700,52 @@ addEventListener('keydown', e => {
 
 /* ---------- boot ---------- */
 document.addEventListener('touchstart', () => {}, { passive: true }); // 아이폰 사파리에서 누르는 동안 모양(:active)이 보이게
-measure();
-addEventListener('resize', measure);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+/* 휴대폰 글자 키움 대응 (2026-11-10): 실제로 그려진 높이를 재서 겹치지 않게 놓는다. 기본 글자 크기에서는 아무것도 바꾸지 않는다 */
+const topEl = document.querySelector('.top'), ttlEl = document.querySelector('.ttl'), footEl = document.querySelector('.foot'), grEl = $('gr'), capEl = $('cap'), rootS = document.documentElement.style;
+function fitTop() {
+  topEl.classList.remove('t1', 't2');
+  for (const c of ['t1', 't2']) { if (topEl.scrollWidth <= topEl.clientWidth + 1) break; topEl.classList.add(c); }
+}
+function fitYears() {
+  let lastR = -1e9;
+  for (const y of tl.querySelectorAll('.yr')) {
+    y.classList.remove('hid');
+    if (getComputedStyle(y).display === 'none') continue;
+    const r = y.getBoundingClientRect();
+    if (r.left < lastR + 6) y.classList.add('hid'); else lastR = r.right;
+  }
+}
+function lineH(cls) { // 두 줄짜리 글자 높이(글자 키움이 반영된 실제 높이)
+  const t = el('div', cls, '가 가'); Object.assign(t.style, { position: 'absolute', visibility: 'hidden', width: '1px', left: '0', top: '0' });
+  capEl.append(t); const h = t.offsetHeight; t.remove(); return h;
+}
+function fitHome() {
+  rootS.removeProperty('--H'); rootS.removeProperty('--cy'); rootS.removeProperty('--capgap');
+  grEl.classList.remove('g3'); grEl.style.bottom = ''; tl.style.bottom = ''; document.querySelectorAll('.kan').forEach(k => k.classList.remove('off'));
+  fitTop(); fitYears();
+  if (innerWidth >= 768) return;
+  if ([...grEl.querySelectorAll('button')].some(b => b.scrollWidth > b.clientWidth + 1)) grEl.classList.add('g3');
+  const vh = innerHeight;
+  // 트랙: 연도 글자가 아래 단추에 닿으면 올린다
+  const footTop = footEl.getBoundingClientRect().top, tr = tl.getBoundingClientRect();
+  const yrB = Math.max(tr.bottom, ...[...tl.querySelectorAll('.yr')].map(y => y.getBoundingClientRect().bottom));
+  if (yrB > footTop - 6) tl.style.bottom = (vh - tr.bottom + yrB - footTop + 6) + 'px';
+  // 학년 줄: 트랙(캐릭터 머리 포함)에 닿으면 올린다
+  const tlTop = tl.getBoundingClientRect().top - 14, gr0 = grEl.getBoundingClientRect();
+  if (gr0.bottom > tlTop) grEl.style.bottom = (vh - tlTop) + 'px';
+  // 진열대·캡션: 제목 줄과 학년 줄 사이에 들어가지 않으면 책을 줄인다(가안)
+  const grTop = grEl.getBoundingClientRect().top - 10, ttlB = ttlEl ? ttlEl.getBoundingClientRect().bottom + 10 : 70;
+  const capMax = lineH('ctitle') + lineH('csub') + lineH('cyear') / 2 + 1 + 30;
+  const H0 = probe.getBoundingClientRect().height, cy0 = shelf.getBoundingClientRect().top + 50 + H0 / 2, gap0 = vh * .042;
+  if (cy0 - H0 * .53 >= ttlB && cy0 + H0 / 2 + gap0 + capMax <= grTop) return;
+  const gap = Math.min(gap0, 14), Hn = Math.max(90, Math.min(H0, (grTop - capMax - gap - ttlB) / 1.06));
+  rootS.setProperty('--H', Hn + 'px'); rootS.setProperty('--cy', (ttlB + Hn * .53) + 'px'); rootS.setProperty('--capgap', gap + 'px');
+  if (Hn < H0 * .85) document.querySelectorAll('.kan').forEach(k => k.classList.add('off'));
+}
+const relayout = () => { fitHome(); measure(); };
+relayout();
+addEventListener('resize', relayout);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
 const h0 = curRoute();
 if (h0.startsWith('b-') && BYID.has(h0.slice(2))) { const bi = BOOKS.findIndex(b => b.id === h0.slice(2)); if (bi >= 0) { s = T = bi + N; } }
 route(); booted = true;

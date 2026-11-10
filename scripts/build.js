@@ -259,7 +259,7 @@ for (const site of sites) {
     // 첫 화면 제목: '동화 작가 임지형'(role이 있으면) + 한 줄 소개(tagline이 있으면). 2026-11-08
     .replace('{{TAGLINE}}', () => `<div class="ttl"><h1>${site.role ? `<span class="role">${esc(site.role)}</span>` : ''}${esc(site.author)}</h1>` +
       (site.tagline ? `<p><b>${esc(site.tagline[0])}</b>${esc(site.tagline[1] || '')}</p>` : '') + '</div>')
-    .replace('{{NAV_ABOUT}}', () => site.about ? '<button id="navAbout" aria-pressed="false">작가</button>' : '')
+    .replace('{{NAV_ABOUT}}', () => site.about ? '<button id="navAbout" aria-pressed="false">작가 소개</button>' : '')
     .replace('{{FOOT_TALK}}', () => site.about?.contact ? '<a class="talk" href="#contact">강연 문의</a>' : '')
     .replace('{{ABOUT}}', () => aboutHtml(site, list, photo))
     .replaceAll('{{VER}}', VER)

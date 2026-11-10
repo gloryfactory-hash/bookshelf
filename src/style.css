@@ -574,3 +574,5 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .card:focus-visible .stack{transform:translateY(-6px)}
 .active .tag button:focus-visible{background-color:var(--accent);color:var(--paper)}
 @media (prefers-reduced-motion:reduce){.arrow svg,.card .stack{transition:none}}
+/* 첫 화면에서 '전체 작품'이 살짝 눈에 들어오게(2026-11-11): 고르지 않았을 때 옅은 이름표 색 바탕 */
+.nav #navLib[aria-pressed="false"]{background:var(--chip);border-radius:3px}

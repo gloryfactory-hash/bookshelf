@@ -331,7 +331,9 @@ for (const site of sites) {
   // 새 책 소식 소개 쪽 (2026-11-11, 시안 시안/새책소식_v1/). 부부작당 공용 소식, 단추는 스티비 구독 화면으로
   {
     const recent = [...list].sort((a, b) => String(b.y).localeCompare(String(a.y))).slice(0, 4);
-    const order = [1, 0, 2, 3].map(i => recent[i]).filter(Boolean);
+    // sites/<slug>.json의 newsCovers(책 ID, 자리 순서: 왼쪽 뒤·가운데 뒤·오른쪽·맨 앞)가 있으면 그대로, 없으면 최근 책 4권
+    const order = site.newsCovers ? site.newsCovers.map(id => { const b = list.find(x => x.id === id || x.isbn === id); if (!b) throw new Error(`newsCovers의 ${id} 책이 없습니다`); return b; })
+      : [1, 0, 2, 3].map(i => recent[i]).filter(Boolean);
     fs.mkdirSync(path.join(out, 'news'), { recursive: true });
     fs.writeFileSync(path.join(out, 'news', 'index.html'), noPh(fs.readFileSync(P('src', 'news.html'), 'utf8')
       .replace('{{OG}}', () => URL0 ? `<link rel="canonical" href="${esc(URL0)}news/">` : '')

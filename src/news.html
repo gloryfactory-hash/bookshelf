@@ -18,8 +18,8 @@
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; --green:#86C6A2; color-scheme:dark}}
+:root[data-theme="dark"]{--green:#86C6A2; --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;word-break:keep-all}
 a{color:inherit}
@@ -31,6 +31,7 @@ a{color:inherit}
 
 main{max-width:1080px;margin:0 auto;padding:56px 24px 72px;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
 .ey{font-size:14px;font-weight:700;color:var(--accent);margin:0 0 18px}
+h1 .pt{font-style:normal;color:var(--green)}
 h1{font-size:clamp(38px,5vw,60px);font-weight:900;line-height:1.15;margin:0 0 22px;letter-spacing:0}
 .lead{font-size:20px;line-height:1.6;margin:0 0 30px;max-width:30em}
 .lead b{font-weight:700}
@@ -80,7 +81,7 @@ h1{font-size:clamp(38px,5vw,60px);font-weight:900;line-height:1.15;margin:0 0 22
 
 <main>
   <div>
-    <h1>새 책이 나오면<br>먼저 알려 드릴게요</h1>
+    <h1><em class="pt">새 책</em>이 나오면<br>먼저 알려 드릴게요</h1>
     <p class="lead"><b>임지형·김민성</b> 작가의 책이 새로 나오면 메일 한 통을 보내요. 어떤 이야기인지, 몇 학년 아이에게 맞는지, 어디서 살 수 있는지 담아요.</p>
     <ul class="promise">
       <li><span class="k">보내는 때</span><span>신간이 나올 때만 보내요. 광고나 정기 소식은 없어요.</span></li>

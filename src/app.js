@@ -366,7 +366,8 @@ function seriesCard(name, list) {
   const mt = el('div', 'mt'); mt.append(el('span', 's', '시리즈 ' + list.length + '권'), document.createTextNode(' / ' + yr));
   c.append(cv, el('div', 't', name), el('div', 'o', list.map(b => b.title).join(', ')), mt);
   c.setAttribute('aria-label', `${name} 시리즈 ${list.length}권 모아 보기`);
-  c.addEventListener('click', () => { F.series = name; renderLib(); lib.scrollTo({ top: 0, behavior: RM.matches ? 'auto' : 'smooth' }); });
+  c.addEventListener('click', () => { F.series = name; if (BYPATH) history.pushState({ series: name }, '', location.pathname + location.hash); renderLib(); // 시리즈도 방문 기록 한 칸(2026-11-11): 뒤로 가기가 보던 전체 작품으로
+    lib.scrollTo({ top: 0, behavior: RM.matches ? 'auto' : 'smooth' }); });
   return c;
 }
 function renderLib() {
@@ -385,7 +386,7 @@ function renderLib() {
   renderSub(pg);
   if (view === 'lib' && openId === null) {
     document.title = pg ? `${pg.h} · ${SITE_TITLE}` : SITE_TITLE;
-    if (BYPATH) { const u = urlFor(lk || 'books'); if (location.pathname + location.hash !== u) history.replaceState(null, '', u); }
+    if (BYPATH) { const u = urlFor(lk || 'books'); if (location.pathname + location.hash !== u || (history.state?.series || null) !== F.series) history.replaceState(F.series ? { series: F.series } : null, '', u); }
   }
   activeBar.textContent = '';
   const tags = [];
@@ -448,9 +449,9 @@ for (const t of SITE.targets) {
 $('grb').style.setProperty('--gn', $('grb').children.length); // 휴대폰에서 칸을 같은 너비로 나눈다
 
 /* ---------- routing ---------- */
-function go(h) {
+function go(h, st = null) {
   if (!BYPATH) { if (location.hash.slice(1) === h) route(); else location.hash = h; return; }
-  const u = urlFor(h); if (location.pathname + location.hash !== u) history.pushState(null, '', u); route();
+  const u = urlFor(h); if (location.pathname + location.hash !== u || st) history.pushState(st, '', u); route();
 }
 let histDepth = 0;
 addEventListener(BYPATH ? 'popstate' : 'hashchange', () => route());
@@ -552,6 +553,7 @@ function route() {
   if (openId !== null) closeDetail();
   seenHome = true;
   if (PAGE.has(h)) { F.tgt = h[0] === 'g' ? h.slice(2) : null; F.kw = h[0] === 'k' ? h.slice(2) : null; F.series = null; F.q = ''; $('q').value = ''; }
+  if (BYPATH && h === 'books') F.series = history.state?.series || null; // 시리즈는 방문 기록에 담아 둔다
   view = h === 'books' || PAGE.has(h) ? 'lib' : (about && ABOUT_HASH.includes(h)) ? 'about' : 'shelf';
   showPanel(view, view === 'about' && h !== 'about' ? h : null);
   if (view === 'shelf' && booted) shelf.focus({ preventScroll: true });
@@ -563,7 +565,7 @@ if ($('navAbout')) $('navAbout').addEventListener('click', () => go('about'));
 // 작가 화면의 '연계 도서'에서 시리즈를 누르면 서고를 그 시리즈로 걸러 연다.
 if (about) about.addEventListener('click', e => {
   const a = e.target.closest('a[data-series]'); if (!a) return;
-  e.preventDefault(); F.tgt = F.kw = null; F.q = ''; $('q').value = ''; F.series = a.dataset.series; go('books');
+  e.preventDefault(); F.tgt = F.kw = null; F.q = ''; $('q').value = ''; F.series = a.dataset.series; go('books', { series: a.dataset.series });
 });
 
 /* ---------- detail ---------- */

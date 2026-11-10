@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>부부작당 새 책 소식</title>
+{{OG}}
+<meta name="description" content="임지형·김민성 작가의 새 책이 나오면 메일로 알려 드려요.">
+<style>
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-5Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900;font-display:swap}
+:root{
+  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#93542A; --hair:rgba(30,36,33,.16);
+  --orange:#b8703f; --orange-deep:#9e5e30; --green:#3d7f5c; --shadow:40,48,44;
+  --step:color-mix(in srgb,#9e5e30 84%,#000);
+  --sans:'Paperozi','Pretendard',system-ui,sans-serif; --serif:'BookkMyungjo','Noto Serif KR',serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;word-break:keep-all}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+.top{max-width:1080px;margin:0 auto;padding:24px 24px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
+.top a{text-decoration:none;color:var(--muted)}
+.top a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+
+main{max-width:1080px;margin:0 auto;padding:56px 24px 72px;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.ey{font-size:14px;font-weight:700;color:var(--accent);margin:0 0 18px}
+h1{font-size:clamp(38px,5vw,60px);font-weight:900;line-height:1.15;margin:0 0 22px;letter-spacing:0}
+.lead{font-size:20px;line-height:1.6;margin:0 0 30px;max-width:30em}
+.lead b{font-weight:700}
+.promise{list-style:none;padding:0;margin:0 0 36px;border-top:1px solid var(--hair)}
+.promise li{display:grid;grid-template-columns:7.5em 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--hair);font-size:16.5px;line-height:1.5}
+.promise dt,.promise .k{font-weight:700;color:var(--muted);font-size:14px;padding-top:2px}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--orange-deep);color:#fff;text-decoration:none;font-weight:700;font-size:18px;padding:17px 28px;border-radius:4px;transition:background-color .2s}
+.cta svg{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+@media (hover:hover){.cta:hover{background:var(--step)}.cta:hover svg{transform:translateX(4px)}}
+.note{font-size:14px;color:var(--muted);line-height:1.6;margin:16px 0 0}
+
+.books{position:relative;height:440px}
+.books figure{position:absolute;margin:0;width:46%;box-shadow:0 18px 36px -14px rgba(var(--shadow),.45)}
+.books img{display:block;width:100%;height:auto}
+.books figure:nth-child(1){left:2%;top:8%;transform:rotate(-5deg)}
+.books figure:nth-child(2){left:30%;top:0;transform:rotate(2deg);z-index:2}
+.books figure:nth-child(3){left:52%;top:14%;transform:rotate(6deg);z-index:1}
+.books figure:nth-child(4){left:18%;top:38%;transform:rotate(-1deg);z-index:3}
+.books figcaption{position:absolute;left:-9999px}
+.cap{font-size:14px;color:var(--muted);text-align:center;margin:56px 0 0}
+
+.who{max-width:1080px;margin:0 auto;padding:40px 24px 64px;border-top:1px solid var(--hair);display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.who h2{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 10px}
+.who p{font-size:16.5px;line-height:1.65;margin:0}
+.tag{display:inline-block;color:#fff;font-weight:700;font-size:14px;padding:3px 10px;border-radius:3px;margin-right:6px}
+.tag.lj{background:var(--orange-deep)}.tag.km{background:var(--green)}
+.who a{color:var(--accent);font-weight:700;text-underline-offset:4px}
+
+@media (max-width:767px){
+  main{grid-template-columns:1fr;gap:28px;padding:28px 20px 48px}
+  .art{order:-1}
+  .books{height:300px;max-width:300px;margin:0 auto}
+  .cap{display:none}
+  .lead{font-size:18px}
+  .promise li{grid-template-columns:6.5em 1fr}
+  .cta{width:100%;justify-content:center}
+  .who{grid-template-columns:1fr;gap:28px;padding:32px 20px 48px}
+  .top{padding:18px 20px 0}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <a href="../">← {{AUTHOR}} 서고로</a>
+  <span>부부작당 새 책 소식</span>
+</header>
+
+<main>
+  <div>
+    <h1>새 책이 나오면<br>먼저 알려 드릴게요</h1>
+    <p class="lead"><b>임지형·김민성</b> 작가의 책이 새로 나오면 메일 한 통을 보내요. 어떤 이야기인지, 몇 학년 아이에게 맞는지, 어디서 살 수 있는지 담아요.</p>
+    <ul class="promise">
+      <li><span class="k">보내는 때</span><span>신간이 나올 때만 보내요. 광고나 정기 소식은 없어요.</span></li>
+      <li><span class="k">받는 분</span><span>아이와 책을 고르는 부모님, 교사·사서 선생님, 그리고 책을 좋아하는 독자</span></li>
+      <li><span class="k">보내는 사람</span><span>{{FROM}}</span></li>
+    </ul>
+    <a class="cta" href="{{STIBEE}}">메일 주소 남기기
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="note">메일 주소는 소식을 보내는 데만 써요. 받은 메일 맨 아래에서 언제든 그만 받을 수 있어요.<br>구독은 스티비 화면에서 이어져요.</p>
+  </div>
+  <div class="art">
+    <div class="books" aria-label="최근에 나온 책">{{COVERS}}</div>
+    <p class="cap">최근에 나온 책</p>
+  </div>
+</main>
+
+<section class="who">
+  <div>
+    <h2>누가 보내나요</h2>
+    <p><span class="tag lj">임지형</span>동화와 청소년소설을 써요. 지금까지 70권이 넘는 책을 냈어요. <a href="https://limjh.kr/">서고 보기</a></p>
+  </div>
+  <div>
+    <h2>&nbsp;</h2>
+    <p><span class="tag km">김민성</span>임지형 작가와 함께 부부작당을 꾸리고 글을 써요.</p>
+  </div>
+</section>
+</body>
+</html>

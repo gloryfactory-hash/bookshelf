@@ -107,7 +107,7 @@ function aboutHtml(site, list, photo) {
       ${a.history ? `<section class="asec"><h2>걸어온 길</h2>${yrs(a.history)}${a.judging ? `<details class="judge"><summary>심사 이력 ${a.judging.length}건</summary>${yrs(a.judging)}</details>` : ''}</section>` : ''}
       ${talks ? `<section class="asec" id="talk"><h2>강연</h2>${a.talkIntro ? `<p class="anote">${esc(a.talkIntro)}</p>` : ''}${strip}<ul class="talks">${talks}</ul>${a.talkCareer ? '<ul class="career">' + a.talkCareer.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>' : ''}</section>` : ''}
       ${c.email || c.form ? `<section class="asec acontact" id="contact"><h2>강연·협업 문의</h2>${c.text ? `<p>${esc(c.text)}</p>` : ''}<div class="cbtn">${c.form ? `<a class="pri" href="${esc(c.form)}" target="_blank" rel="noopener">문의 폼 작성하기</a>` : ''}${c.email ? `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}</div><p class="ch">작가의 일상과 책 이야기는 유튜브 채널 <a href="${esc(CH.youtube)}" target="_blank" rel="noopener">${esc(CH.name)}</a>에서 만나요.</p></section>` : ''}
-      <div class="libfoot lbl"><span>© ${esc(site.author)} · ${esc(CH.name)}</span><a href="${esc(CH.news)}" target="_blank" rel="noopener">새 책 소식 받기</a></div>
+      <div class="libfoot lbl"><span>© ${esc(site.author)} · ${esc(CH.name)}</span><a href="news/">새 책 소식 받기</a></div>
     </div>
   </div>
 </section>`;
@@ -254,7 +254,7 @@ for (const site of sites) {
     .replaceAll('{{RUNNER}}', site.runner ? ' data-runner' : '') // 트랙 위 도트 캐릭터 (2026-11-08). 지금은 임지형 서가만
     .replaceAll('{{CHANNEL}}', esc(CH.name))
     .replaceAll('{{YOUTUBE}}', esc(CH.youtube))
-    .replaceAll('{{NEWS}}', esc(CH.news))
+    .replaceAll('{{NEWS}}', 'news/') // 서가 안 소개 쪽(2026-11-11). 그 쪽 단추가 스티비로 넘긴다
     .replace('{{WHO}}', () => whoTabs(site, sites))
     // 첫 화면 제목: '동화 작가 임지형'(role이 있으면) + 한 줄 소개(tagline이 있으면). 2026-11-08
     .replace('{{TAGLINE}}', () => `<div class="ttl"><h1>${site.role ? `<span class="role">${esc(site.role)}</span>` : ''}${esc(site.author)}</h1>` +
@@ -324,9 +324,21 @@ for (const site of sites) {
   }
   // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html
   if (URL0) {
-    const urls = [URL0, ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
+    const urls = [URL0, URL0 + 'news/', ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
     fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
     fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${URL0}sitemap.xml\n`);
+  }
+  // 새 책 소식 소개 쪽 (2026-11-11, 시안 시안/새책소식_v1/). 부부작당 공용 소식, 단추는 스티비 구독 화면으로
+  {
+    const recent = [...list].sort((a, b) => String(b.y).localeCompare(String(a.y))).slice(0, 4);
+    const order = [1, 0, 2, 3].map(i => recent[i]).filter(Boolean);
+    fs.mkdirSync(path.join(out, 'news'), { recursive: true });
+    fs.writeFileSync(path.join(out, 'news', 'index.html'), noPh(fs.readFileSync(P('src', 'news.html'), 'utf8')
+      .replace('{{OG}}', () => URL0 ? `<link rel="canonical" href="${esc(URL0)}news/">` : '')
+      .replaceAll('{{AUTHOR}}', esc(site.author))
+      .replaceAll('{{STIBEE}}', esc(CH.news))
+      .replaceAll('{{FROM}}', esc(CH.newsFrom || CH.name))
+      .replace('{{COVERS}}', () => order.map(b => `<figure><img src="../covers/${b.id}.webp?v=${VER}" alt="${esc(b.title)} 표지"><figcaption>${esc(b.title)}</figcaption></figure>`).join(''))));
   }
   fs.writeFileSync(path.join(out, '404.html'), notFound(site.title, [[URL0 || './', site.title + ' 첫 화면으로']]));
   if (!URL0) console.warn(`[${site.slug}] 배포 주소(sites/${site.slug}.json의 "url")가 없어 미리보기 그림 태그를 넣지 않았습니다. 카카오톡 미리보기에 그림이 뜨지 않습니다.`);

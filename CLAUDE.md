@@ -12,6 +12,7 @@
 - `data/covers/<ID>.jpg` — 표지 원본. 파일 이름이 책 ID와 같아야 한다.
 - `sites/<slug>.json` — 서가별 설정(작가 이름, 색 `color`(orange 임지형 / green 김민성), 배경 큰 글자 `kan`, 첫 화면 제목 앞말 `role`(예: 동화 작가), 첫 화면 한 줄 `tagline`, 진열대에 올릴 최근 권수 `recentCount`, 작가 화면 내용 `about`, 배포 주소 `url`(없으면 카톡 미리보기 그림 태그가 빠진다. 임지형은 https://limjh.kr/) 등). `draft: true`면 전체 빌드에서 빠진다.
 - `data/channel.json` — 부부작당 채널 주소, 새 책 소식(스티비) 주소, 머리줄 작가 탭 순서.
+- 새 책 소식 소개 쪽(2026-11-11, 시안 `시안/새책소식_v1/`): `src/news.html`을 build가 `<서가>/news/`로 만든다(최근 책 표지 4장, 보내는 사람은 channel.json `newsFrom`). 서가의 '새 책 소식 받기'는 이 쪽으로 같은 탭에서 가고, 이 쪽 단추가 스티비(`news`)로 넘긴다. 소식은 부부작당 공용, 신간이 나올 때만.
 - `data/media/<slug>/` — 작가 사진 원본(빌드 때 webp로 줄인다).
 - `src/fonts/` — 페이퍼로지, 부크크 명조. 부크크 명조는 빌드 때 그 서가에 나오는 글자만 남긴다(`subset-font`).
 - `src/` — 모든 서가가 함께 쓰는 화면 코드. `index.html`(틀), `style.css`, `app.js`.

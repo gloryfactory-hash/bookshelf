@@ -313,7 +313,8 @@ const chipBtns = KW.map(k => {
   const bt = el('button', 'chip'); bt.append(document.createTextNode(k), el('span', 'n'));
   bt.addEventListener('click', () => { F.kw = F.kw === k ? null : k; renderLib(); }); chips.append(bt); return [k, bt];
 });
-// 휴대폰에서는 주제를 두 줄만 보이고 '주제 모두 보기'로 펼친다. 고른 주제는 늘 보인다.
+// 주제는 휴대폰 두 줄, 컴퓨터 한 줄만 보이고 '주제 모두 보기'로 펼친다. 고른 주제는 늘 보인다.
+// (컴퓨터는 2026-11-10 레퍼런스 보고서 반영: 학년 페이지에서 거르기 줄이 3단이라 책이 화면 아래로 밀렸다)
 const more = el('button', 'more'); more.type = 'button';
 more.innerHTML = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0v10M0 5h10" stroke="currentColor" stroke-width="1.4"/></svg><span></span>';
 chips.append(more);
@@ -322,18 +323,23 @@ let chipsOpen = false;
 function foldChips() {
   const list = chipBtns.map(x => x[1]);
   list.forEach(c => c.classList.remove('fold'));
-  more.hidden = !MOB.matches;
-  if (!MOB.matches || lib.hidden) return;
+  if (lib.hidden) return;
+  more.hidden = false;
+  const shown = list.filter(c => getComputedStyle(c).display !== 'none');
+  if (!shown.length) { more.hidden = true; return; }
   more.setAttribute('aria-expanded', String(chipsOpen));
-  more.lastChild.textContent = chipsOpen ? '접기' : '주제 모두 보기 ' + list.length;
+  more.lastChild.textContent = chipsOpen ? '접기' : '주제 모두 보기 ' + shown.length;
   if (chipsOpen) return;
-  const limit = list[0].offsetTop + list[0].offsetHeight * 1.5 + 8; // 두 번째 줄까지
-  for (let i = list.length - 1; i >= 0 && more.offsetTop > limit; i--) {
-    if (list[i].getAttribute('aria-pressed') !== 'true') list[i].classList.add('fold');
+  const limit = shown[0].offsetTop + shown[0].offsetHeight * (MOB.matches ? 1.5 : .5) + 8; // 휴대폰 두 번째 줄, 컴퓨터 첫 줄까지
+  let folded = 0;
+  for (let i = shown.length - 1; i >= 0 && more.offsetTop > limit; i--) {
+    if (shown[i].getAttribute('aria-pressed') !== 'true') { shown[i].classList.add('fold'); folded++; }
   }
+  if (!folded) more.hidden = true;
 }
 more.addEventListener('click', () => { chipsOpen = !chipsOpen; foldChips(); });
 addEventListener('resize', foldChips);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(foldChips); // 글꼴이 늦게 오면 칩 너비가 바뀐다
 $('q').addEventListener('input', e => { F.q = e.target.value.trim(); renderLib(); });
 $('sort').addEventListener('change', e => { F.sort = e.target.value; renderLib(); });
 function sorter(a, b) {
@@ -371,7 +377,6 @@ function renderLib() {
   });
   const kbase = ALL.filter(b => pass(b, 'kw'));
   chipBtns.forEach(([k, bt]) => { const n = kbase.filter(b => b.kw.includes(k)).length; bt.querySelector('.n').textContent = n; bt.setAttribute('aria-pressed', String(F.kw === k)); bt.disabled = !n && F.kw !== k; });
-  foldChips();
   const list = ALL.filter(b => pass(b)).sort(sorter);
   const lk = landKey(), pg = lk && PAGE.get(lk);
   $('libH').textContent = pg ? pg.h : '전체 작품';
@@ -389,6 +394,7 @@ function renderLib() {
   if (F.kw) tags.push([F.kw, () => { F.kw = null; }]);
   if (F.q) tags.push(['“' + F.q + '”', () => { F.q = ''; $('q').value = ''; }]);
   document.body.classList.toggle('land', !!pg); // 학년·주제 페이지: 0권 주제 단추는 숨김(style.css .land)
+  foldChips(); // .land가 정해진 뒤에 접어야 숨은 주제를 세지 않는다
   if (tags.length && !pg) activeBar.append(el('span', null, list.length + '권')); // 학년·주제 페이지는 제목에 권수가 있다 // 조건이 없으면 제목의 '전체 작품 70권'과 겹치니 빼다
   for (const [label, fn] of tags) {
     const t = el('span', 'tag', label), x = el('button'); x.setAttribute('aria-label', label + ' 조건 빼기');

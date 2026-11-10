@@ -205,14 +205,14 @@ button{background:none;border:0;padding:0}
 .sort{height:44px;padding:0 10px;border:1px solid var(--rule);background:var(--paper);font-family:var(--kr);font-size:var(--fs-2);border-radius:0}
 .seg{display:flex;flex-wrap:wrap;border-top:1px solid var(--rule);border-bottom:1px solid var(--hair)}
 .seg button{position:relative;padding:14px 18px 13px 0;margin-right:18px;font-family:var(--kr);font-weight:500;font-size:var(--fs-3);color:var(--muted)}
-.seg button .n{font-family:var(--sans);font-size:var(--fs-1);margin-left:5px;font-feature-settings:"tnum"}
+.seg button .n{font-family:var(--sans);font-size:var(--fs-2);margin-left:5px;font-feature-settings:"tnum"}
 .seg button .ag{display:block;font-size:var(--fs-1);font-weight:500;margin-top:3px}
 .seg button[aria-pressed="true"]{color:var(--accent)}
 .seg button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:18px;top:-1px;height:3px;background:var(--accent)}
 .seg button:disabled{opacity:.35}
 .chips{display:flex;flex-wrap:wrap;gap:6px;padding:16px 0 6px}
 .chip{height:30px;padding:0 11px;border:1px solid var(--hair);font-family:var(--kr);font-size:var(--fs-2);color:var(--ink);background:transparent}
-.chip .n{font-family:var(--sans);font-size:var(--fs-1);color:var(--muted);margin-left:4px;font-feature-settings:"tnum"}
+.chip .n{font-family:var(--sans);font-size:var(--fs-2);color:var(--muted);margin-left:4px;font-feature-settings:"tnum"}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
 .chip[aria-pressed="true"] .n{color:inherit;opacity:.8}
 .chip:disabled{opacity:.35}
@@ -244,7 +244,7 @@ button{background:none;border:0;padding:0}
 .lrow{display:grid;grid-template-columns:minmax(7.5em,max-content) 1fr;gap:6px 36px;padding:14px 0;border-top:1px solid var(--hair)}
 .lrow h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-3);line-height:1.6;color:var(--ink);white-space:nowrap}
 .lrow h3 a{border-bottom:1px solid var(--rule)}
-.lrow h3 .n{margin-left:8px;font-family:var(--sans);font-weight:500;font-size:var(--fs-1);color:var(--muted);font-feature-settings:"tnum"}
+.lrow h3 .n{margin-left:8px;font-family:var(--sans);font-weight:500;font-size:var(--fs-2);color:var(--muted);font-feature-settings:"tnum"}
 .lrow ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:2px 18px;font-family:var(--kr);font-size:var(--fs-2);line-height:1.6;color:var(--muted);word-break:keep-all}
 .lrow ul a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--hair);text-decoration-thickness:1px;text-underline-offset:4px}
 .lrow a{transition:color .2s,border-color .2s}
@@ -280,11 +280,11 @@ button{background:none;border:0;padding:0}
 .dkw button{height:28px;padding:0 10px;background:var(--chip);color:var(--accent);font-family:var(--kr);font-size:var(--fs-2)}
 .dsyn{margin:0;font-family:var(--serif);font-weight:400;font-size:var(--fs-body);line-height:1.85;max-width:34em;color:var(--ink);word-break:keep-all;}
 .drec{display:grid;gap:8px}
-.drec h3,.drel h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-1);letter-spacing:0;color:var(--muted)}
+.drec h3,.drel h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-2);letter-spacing:0;color:var(--muted)}
 .drec ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.drec li{font-family:var(--kr);font-size:var(--fs-1);padding:4px 8px;border:1px solid var(--hair)}
+.drec li{font-family:var(--kr);font-weight:700;font-size:var(--fs-2);padding:4px 10px;border:1px solid var(--accent);color:var(--accent)} /* 기관 추천을 한줄평 바로 아래 배지로 (2026-11-10 레퍼런스 보고서) */
 .dbib{display:grid;gap:8px;width:100%} /* 도서 정보 표 (2026-11-08) */
-.dbib h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-1);color:var(--muted)}
+.dbib h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-2);color:var(--muted)}
 .dbib dl{margin:0;display:grid;grid-template-columns:5.5em minmax(0,1fr);width:min(100%,440px);border-top:1px solid var(--rule)}
 .dbib dt,.dbib dd{margin:0;min-height:40px;padding:9px 0;border-bottom:1px solid var(--hair);font-family:var(--kr);font-size:var(--fs-2);line-height:1.5}
 .dbib dt{font-weight:700;color:var(--muted)}
@@ -294,7 +294,7 @@ button{background:none;border:0;padding:0}
 .icopy.copied{color:var(--accent)}
 /* 서점 한 줄 (2026-11-08): YES24 | 교보문고 | 알라딘 같은 너비. 첫째는 채운 단추, 나머지는 테두리 */
 .dbuy{display:grid;gap:8px;width:100%}
-.dbuy h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-1);color:var(--muted)}
+.dbuy h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-2);color:var(--muted)}
 .dbuy .shops{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;width:min(100%,440px)}
 .dbuy a{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 6px;border:1px solid var(--accent);color:var(--accent);font-family:var(--kr);font-weight:700;font-size:var(--fs-2);white-space:nowrap}
 .dbuy a:first-child{background:var(--accent);color:var(--sheet)}
@@ -312,7 +312,7 @@ button{background:none;border:0;padding:0}
 .ttl h1{margin:0;font-weight:900;font-size:var(--fs-5);line-height:1.15;letter-spacing:0;color:var(--accent)}
 .ttl h1 .role{font-weight:700;color:var(--ink);margin-right:.3em}
 .ttl p{margin:8px 0 0;font-family:var(--serif);font-weight:400;font-size:var(--fs-3);line-height:1.4;color:var(--ink)}
-.ttl p b{font-family:var(--sans);font-weight:700;font-size:var(--fs-1);letter-spacing:0;color:var(--accent);margin-right:10px}
+.ttl p b{font-family:var(--sans);font-weight:700;font-size:var(--fs-2);letter-spacing:0;color:var(--accent);margin-right:10px}
 /* 키 낮은 노트북: 제목과 한 줄 소개를 한 줄로 */
 @media (min-width:768px) and (max-height:800px){.ttl{display:flex;align-items:baseline;gap:18px}.ttl h1{font-size:var(--fs-4)}.ttl p{margin:0;font-size:var(--fs-2)}}
 
@@ -554,3 +554,23 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .search input{width:100%}
 }
 @media (max-width:767px) and (max-height:700px){.csub{display:none}}
+
+/* 2026-11-10 레퍼런스 보고서 반영: 휴대폰에서는 배경 큰 외곽선 글자가 책과 겹쳐 지저분해 보여 뺀다 */
+@media (max-width:767px){.kan{display:none}}
+
+/* 마우스 올림 반응 빠진 곳 채움 (2026-11-10 점검): 첫 화면 화살표, 시리즈 카드(겹친 표지는 각자 기울기가 있어 묶음째 올림), 조건 빼기 ✕ */
+.arrow{border-radius:50%;transition:background-color .2s}
+.arrow svg{transition:transform .3s var(--ease)}
+.card .stack{transition:transform .45s var(--ease)}
+.active .tag button{border-radius:3px;transition:background-color .2s,color .2s}
+@media (hover:hover){
+  .arrow:hover{background-color:var(--chip)}
+  .arrow.prev:hover svg{transform:translateX(-4px)}
+  .arrow.next:hover svg{transform:translateX(4px)}
+  .card:hover .stack{transform:translateY(-6px)}
+  .active .tag button:hover{background-color:var(--accent);color:var(--paper)}
+}
+.arrow:focus-visible{background-color:var(--chip)}
+.card:focus-visible .stack{transform:translateY(-6px)}
+.active .tag button:focus-visible{background-color:var(--accent);color:var(--paper)}
+@media (prefers-reduced-motion:reduce){.arrow svg,.card .stack{transition:none}}

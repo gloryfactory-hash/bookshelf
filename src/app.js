@@ -524,6 +524,8 @@ function showPanel(name, anchor) {
     if (on && was) { if (anchor) jump(p, anchor); continue; }
     if (on) {
       p.hidden = false; p.scrollTop = 0; p.style.zIndex = 52; if (k === 'lib') foldChips(); if (k === 'about' && aboutPhotoReset) aboutPhotoReset();
+      // 작가 소개 → 연계 도서 → 뒤로: 읽던 자리로 (2026-11-11). 위치는 떠날 때 방문 기록에 넣어 둔다
+      const ay = k === 'about' && !anchor && history.state?.aboutY; if (ay) requestAnimationFrame(() => { p.scrollTop = ay; });
       p.animate([{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: RM.matches ? 1 : 700, easing: 'cubic-bezier(.76,0,.18,1)' });
       if (anchor) jump(p, anchor, true);
     } else if (was) {
@@ -565,7 +567,7 @@ if ($('navAbout')) $('navAbout').addEventListener('click', () => go('about'));
 // 작가 화면의 '연계 도서'에서 시리즈를 누르면 서고를 그 시리즈로 걸러 연다.
 if (about) about.addEventListener('click', e => {
   const a = e.target.closest('a[data-series]'); if (!a) return;
-  e.preventDefault(); F.tgt = F.kw = null; F.q = ''; $('q').value = ''; F.series = a.dataset.series; go('books', { series: a.dataset.series });
+  e.preventDefault(); history.replaceState({ ...(history.state || {}), aboutY: about.scrollTop }, '', location.pathname + location.hash); F.tgt = F.kw = null; F.q = ''; $('q').value = ''; F.series = a.dataset.series; go('books', { series: a.dataset.series });
 });
 
 /* ---------- detail ---------- */

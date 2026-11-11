@@ -101,7 +101,7 @@ function aboutHtml(site, list, photo) {
       <p class="akick">작가 소개</p>
       <h1 class="aquote" id="aTitle">“${esc(a.quote)}”</h1>
       <p class="alead">${esc(a.lead)}</p>
-      <ul class="astats">${stats.map(([n, l]) => `<li><b>${esc(n)}</b>${esc(l)}</li>`).join('')}</ul>
+      <ul class="astats">${stats.map(([n, l]) => `<li><b>${esc(n)}</b>${esc(l)}</li>`).join('')}</ul>${c.email || c.form ? '<p class="ajump"><button type="button" data-jump="contact">강연·북토크 문의하기 ↓</button></p>' : ''}
       <div class="abio">${(a.bio || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
       ${a.run ? `${inline('run')}<section class="arun">${site.runner ? '<div class="artk" aria-hidden="true"></div><div class="arme" aria-hidden="true"><i class="sw"></i><i class="rn"></i></div>' : ''}<h2>${esc(a.run.title)}</h2><p>${esc(a.run.text)}</p></section>` : ''}
       ${a.history ? `<section class="asec"><h2>걸어온 길</h2>${yrs(a.history)}${a.judging ? `<details class="judge"><summary>심사 이력 ${a.judging.length}건</summary>${yrs(a.judging)}</details>` : ''}</section>` : ''}

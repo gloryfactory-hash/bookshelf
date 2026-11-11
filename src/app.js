@@ -759,3 +759,6 @@ if (h0.startsWith('b-') && BYID.has(h0.slice(2))) { const bi = BOOKS.findIndex(b
 route(); booted = true;
 requestAnimationFrame(t => { last = t; frame(t); });
 })();
+
+// 작가 소개 위쪽 '문의하기' → 문의 칸으로 (2026-11-11 점검: 교사·사서가 찾는 칸이 맨 아래라 길을 낸다). 해시는 바꾸지 않는다(#about 라우트 유지)
+document.addEventListener('click', e => { const b = e.target.closest('[data-jump]'); if (!b) return; const t = document.getElementById(b.dataset.jump); if (!t) return; t.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); t.querySelector('a')?.focus({ preventScroll: true }); });

@@ -11,15 +11,15 @@
 @font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-display:swap}
 @font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900;font-display:swap}
 :root{
-  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#93542A; --hair:rgba(30,36,33,.16);
-  --orange:#b8703f; --orange-deep:#9e5e30; --green:#3d7f5c; --shadow:40,48,44;
-  --step:color-mix(in srgb,#9e5e30 84%,#000);
+  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --hair:rgba(30,36,33,.16);
+  --orange:#e3a03e; --orange-deep:#9c5a26; --green:#3fae78; --green-deep:#2f6e4c; /* 채널 색 2026-11-11 안 B */ --shadow:40,48,44;
+  --step:color-mix(in srgb,#9c5a26 84%,#000);
   --sans:'Paperozi','Pretendard',system-ui,sans-serif; --serif:'BookkMyungjo','Noto Serif KR',serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; --green:#86C6A2; color-scheme:dark}}
-:root[data-theme="dark"]{--green:#86C6A2; --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --hair:rgba(233,236,233,.16); --shadow:0,0,0; --green:#86C6A2; --green-deep:#86C6A2; color-scheme:dark}}
+:root[data-theme="dark"]{--green:#86C6A2; --green-deep:#86C6A2; --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --hair:rgba(233,236,233,.16); --shadow:0,0,0; color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;word-break:keep-all}
 a{color:inherit}
@@ -31,7 +31,7 @@ a{color:inherit}
 
 main{max-width:1080px;margin:0 auto;padding:56px 24px 72px;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
 .ey{font-size:14px;font-weight:700;color:var(--accent);margin:0 0 18px}
-h1 .pt{font-style:normal;color:var(--green)}
+h1 .pt{font-style:normal;color:var(--green-deep)}
 h1{font-size:clamp(38px,5vw,60px);font-weight:900;line-height:1.15;margin:0 0 22px;letter-spacing:0}
 .lead{font-size:20px;line-height:1.6;margin:0 0 30px;max-width:30em}
 .lead b{font-weight:700}
@@ -57,7 +57,7 @@ h1{font-size:clamp(38px,5vw,60px);font-weight:900;line-height:1.15;margin:0 0 22
 .who h2{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 10px}
 .who p{font-size:16.5px;line-height:1.65;margin:0}
 .tag{display:inline-block;color:#fff;font-weight:700;font-size:14px;padding:3px 10px;border-radius:3px;margin-right:6px}
-.tag.lj{background:var(--orange-deep)}.tag.km{background:var(--green)}
+.tag.lj{background:var(--orange-deep)}.tag.km{background:var(--green-deep)}
 .who a{color:var(--accent);font-weight:700;text-underline-offset:4px}
 
 @media (max-width:767px){

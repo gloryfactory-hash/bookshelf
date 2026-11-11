@@ -146,7 +146,7 @@ const bookLd = (b, URL0, key, hasImg) => '<script type="application/ld+json">' +
 }) + '</script>';
 // 없는 주소 화면. Cloudflare Pages는 404.html이 없으면 아무 주소에나 첫 화면을 200으로 보내(검색엔진에는 같은 페이지가 끝없이 보임) 따로 둔다.
 const notFound = (title, links) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>페이지를 찾을 수 없어요 · ${esc(title)}</title>
-<style>:root{--p:#EDF0EE;--i:#1E2421;--m:#5E6661;--a:#93542A;color-scheme:light}@media (prefers-color-scheme:dark){:root{--p:#171B19;--i:#E9ECE9;--m:#A2AAA5;--a:#E0A274;color-scheme:dark}}
+<style>:root{--p:#EDF0EE;--i:#1E2421;--m:#5E6661;--a:#9c5a26;color-scheme:light}@media (prefers-color-scheme:dark){:root{--p:#171B19;--i:#E9ECE9;--m:#A2AAA5;--a:#E3A03E;color-scheme:dark}}
 body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--p);color:var(--i);font-family:'Pretendard',system-ui,sans-serif;padding:24px;box-sizing:border-box}
 main{max-width:420px}h1{margin:0 0 12px;font-size:22px;color:var(--a)}p{margin:0 0 24px;line-height:1.6;color:var(--m)}
 a{display:inline-flex;align-items:center;height:44px;padding:0 18px;border:1px solid var(--a);background:var(--a);color:var(--p);font-weight:700;text-decoration:none;margin:0 8px 8px 0}</style></head>

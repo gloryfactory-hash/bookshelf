@@ -6,13 +6,13 @@
 @font-face{font-family:'BookkMyungjo';src:url('fonts/BookkMyungjo-Lt.woff2') format('woff2');font-weight:400;font-display:swap}
 @font-face{font-family:'BookkMyungjo';src:url('fonts/BookkMyungjo-Bd.woff2') format('woff2');font-weight:700;font-display:swap}
 
-/* 부부작당 색. --me는 이 서가 작가의 이름표 색(임지형 주황, 김민성 초록): 트랙·점·탭 같은 표시에만 쓴다.
-   흰 글자를 올릴 땐 --me-deep(흰 글자 4.5:1 이상), 글자색으로는 --accent. */
+/* 부부작당 색 (2026-11-11 채널 색 안 B). --me는 이 서가 작가의 이름표 면 색(임지형 주황, 김민성 초록): 트랙·점·탭 같은 표시에만 쓴다.
+   면 위 글자는 --me-on(진한 색). 흰 글자를 올릴 땐 --me-deep(채널 '글자용' 색, 흰 글자 4.5:1 이상), 글자색으로는 --accent. */
 :root{
-  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#93542A; --rule:rgba(30,36,33,.85); --hair:rgba(30,36,33,.16);
-  --shadow:40,48,44; --ringfill:rgba(237,240,238,.85); --chip:rgba(184,112,63,.10);
-  --orange:#b8703f; --orange-deep:#9e5e30; --green:#3d7f5c;
-  --me:var(--orange); --me-deep:var(--orange-deep); --kan-stroke:rgba(184,112,63,.55);
+  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --rule:rgba(30,36,33,.85); --hair:rgba(30,36,33,.16);
+  --shadow:40,48,44; --ringfill:rgba(237,240,238,.85); --chip:rgba(227,160,62,.16);
+  --orange:#e3a03e; --orange-deep:#9c5a26; --orange-on:#3a2206; --green:#3fae78; --green-deep:#2f6e4c; --green-on:#0d2e1d;
+  --me:var(--orange); --me-deep:var(--orange-deep); --me-on:var(--orange-on); --kan-stroke:rgba(227,160,62,.6);
   --ease:cubic-bezier(.2,.8,.2,1);
   --step:color-mix(in srgb,var(--accent) 84%,#000); /* 채운 단추에 마우스를 올렸을 때 한 단계 진한 색 */
   --H:min(41vh,30vw);
@@ -29,20 +29,20 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-:root[data-me="green"]{--step:color-mix(in srgb,#2F6B4C 84%,#000); --accent:#2F6B4C; --chip:rgba(61,127,92,.10); --me:var(--green); --me-deep:var(--green); --kan-stroke:rgba(61,127,92,.5)}
+:root[data-me="green"]{--step:color-mix(in srgb,#2f6e4c 84%,#000); --accent:#2f6e4c; --chip:rgba(63,174,120,.14); --me:var(--green); --me-deep:var(--green-deep); --me-on:var(--green-on); --kan-stroke:rgba(63,174,120,.5)}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --rule:rgba(233,236,233,.8); --hair:rgba(233,236,233,.16);
-    --shadow:0,0,0; --ringfill:rgba(23,27,25,.85); --chip:rgba(224,162,116,.14); --kan-stroke:rgba(224,162,116,.42);
-    --step:color-mix(in srgb,#E0A274 84%,#fff); /* 어두운 화면에서는 밝은 쪽으로 한 단계 */
+    --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --rule:rgba(233,236,233,.8); --hair:rgba(233,236,233,.16);
+    --shadow:0,0,0; --ringfill:rgba(23,27,25,.85); --chip:rgba(227,160,62,.14); --kan-stroke:rgba(227,160,62,.42);
+    --step:color-mix(in srgb,#E3A03E 84%,#fff); /* 어두운 화면에서는 밝은 쪽으로 한 단계 */
     color-scheme:dark;
   }
   :root[data-me="green"]:not([data-theme="light"]){--step:color-mix(in srgb,#86C6A2 84%,#fff); --accent:#86C6A2; --chip:rgba(134,198,162,.14); --kan-stroke:rgba(134,198,162,.4)}
 }
 :root[data-theme="dark"]{
-  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E0A274; --rule:rgba(233,236,233,.8); --hair:rgba(233,236,233,.16);
-  --shadow:0,0,0; --ringfill:rgba(23,27,25,.85); --chip:rgba(224,162,116,.14); --kan-stroke:rgba(224,162,116,.42);
-  --step:color-mix(in srgb,#E0A274 84%,#fff);
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --rule:rgba(233,236,233,.8); --hair:rgba(233,236,233,.16);
+  --shadow:0,0,0; --ringfill:rgba(23,27,25,.85); --chip:rgba(227,160,62,.14); --kan-stroke:rgba(227,160,62,.42);
+  --step:color-mix(in srgb,#E3A03E 84%,#fff);
   color-scheme:dark;
 }
 :root[data-theme="dark"][data-me="green"]{--step:color-mix(in srgb,#86C6A2 84%,#fff); --accent:#86C6A2; --chip:rgba(134,198,162,.14); --kan-stroke:rgba(134,198,162,.4)}
@@ -69,7 +69,7 @@ button{background:none;border:0;padding:0}
 .who{display:flex;gap:4px}
 .who>*{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 11px;font-weight:700;font-size:var(--fs-2);color:var(--muted);border-radius:6px}
 .who i{width:9px;height:9px;border-radius:2px;background:var(--c)}
-.who .lj{--c:var(--orange);--cd:var(--orange-deep)} .who .km{--c:var(--green);--cd:var(--green)}
+.who .lj{--c:var(--orange);--cd:var(--orange-deep)} .who .km{--c:var(--green);--cd:var(--green-deep)}
 .who a[aria-current]{background:var(--cd);color:#fff}
 .who a[aria-current] i{background:#fff}
 .who a:not([aria-current]):hover{color:var(--ink)}
@@ -146,7 +146,7 @@ button{background:none;border:0;padding:0}
 .tl .start{position:absolute;right:100%;top:0;width:30px;height:30px;border-radius:3px 0 0 3px;display:grid;grid-template-rows:9px 10px 11px;background:
   linear-gradient(#fff,#fff) 0 9px/100% 1.5px no-repeat,linear-gradient(#fff,#fff) 0 19px/100% 1.5px no-repeat,var(--me)}
 .tl .start::after{content:"";position:absolute;right:0;top:0;bottom:0;width:2px;background:#fff}
-.tl .start b{display:flex;align-items:center;justify-content:center;padding-right:3px;font-family:var(--sans);font-weight:700;font-size:8px;line-height:1;color:#fff;font-feature-settings:"tnum"}
+.tl .start b{display:flex;align-items:center;justify-content:center;padding-right:3px;font-family:var(--sans);font-weight:700;font-size:8px;line-height:1;color:var(--me-on);font-feature-settings:"tnum"}
 /* 트랙 위 작가 도트 캐릭터 (2026-11-08, 시안 track_v1 나). sites/*.json의 "runner"가 켜진 서가만(<html data-runner>).
    그림은 scripts/sprite.js: 14×16칸을 2배(28×32px), 12장을 옆으로 이은 한 장. 칸 위치 = -(순서 × 28px):
    run1~4 0~-84 / stand -112 / wave1·2 -140·-168 / strA1·2 -196·-224 / strB -252 / front -280 / kiss -308 */

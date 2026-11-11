@@ -26,7 +26,7 @@ import { newestFirst, shareBookOf } from './share.js';
 export { newestFirst };
 
 // 색은 채널 이름표 색. 바탕은 서가와 같은 회녹색 종이(#EDF0EE). 크림색은 쓰지 않는다.
-const COLOR = { orange: { me: '#b8703f', accent: '#93542A' }, green: { me: '#3d7f5c', accent: '#2F6B4C' } };
+const COLOR = { orange: { me: '#e3a03e', accent: '#9c5a26' }, green: { me: '#3fae78', accent: '#2f6e4c' } }; // 채널 색 2026-11-11 안 B
 const fontDir = pathToFileURL(P('src', 'fonts')).href;
 const CSS = c => `
 @font-face{font-family:P;src:url('${fontDir}/Paperlogy-5Medium.woff2');font-weight:500}

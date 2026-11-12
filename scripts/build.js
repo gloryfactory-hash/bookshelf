@@ -14,6 +14,7 @@ import { sheetSvg, sweatSvg, heartSvg, FW, FH, ORDER } from './sprite.js';
 import { shareBookOf, newestFirst } from './share.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ROOT_EXTRAS = path.join(root, 'extras');
 const P = (...p) => path.join(root, ...p);
 const only = process.argv[2] || null;
 const LARGE_H = 1000, THUMB_H = 360;
@@ -355,6 +356,9 @@ for (const site of sites) {
     fs.writeFileSync(path.join(out, 'assets', 'sweat.svg'), sweatSvg());
     fs.writeFileSync(path.join(out, 'assets', 'heart.svg'), heartSvg());
   }
+  // 따로 만든 쪽(예: 주인공 찾기 hero/)을 그대로 얹는다. extras/<slug>/ 는 저장소에 올리지 않는다.
+  const extra = path.join(ROOT_EXTRAS, site.slug);
+  if (fs.existsSync(extra)) { fs.cpSync(extra, out, { recursive: true }); console.log(`[${site.slug}] extras: ${fs.readdirSync(extra).join(', ')}`); }
   built.push(site);
   console.log(`[${site.slug}] ${list.length}권 → dist/${site.slug}/` + (small ? `  (세로 700px 미만 표지 ${small}장: 큰 표지로 바꾸면 상세 화면이 선명해집니다)` : ''));
 }

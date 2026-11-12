@@ -9,3 +9,5 @@ shots/
 # 작업 도구 설정·점검 기록
 .claude/
 .impeccable/
+# 따로 만든 쪽(주인공 찾기 등). limjh.kr에만 올림
+extras/

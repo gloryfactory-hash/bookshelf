@@ -330,11 +330,16 @@ for (const site of sites) {
     const d = path.join(out, 'go', k, String(keyOf(b))); fs.mkdirSync(d, { recursive: true });
     fs.writeFileSync(path.join(d, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer-when-downgrade"><meta http-equiv="refresh" content="3;url=${esc(u)}"><title>${esc(b.title)} · 서점으로 가는 중</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#555;background:#fff}@media (prefers-color-scheme:dark){body{background:#1b1d1c;color:#bbb}}a{color:inherit}</style></head><body><p>서점으로 가는 중… <a href="${esc(u)}">바로 가기</a></p><script>(function(){var u=${safeJson(u)},g=function(){location.replace(u)};if(document.readyState==='complete')setTimeout(g,350);else addEventListener('load',function(){setTimeout(g,350)});setTimeout(g,1500)})()</script></body></html>`);
   }
+  // 강연 QR이 가리키는 쪽 (2026-11-16): talk/ → 첫 화면. 통계에 /talk/ 방문으로 따로 쌓인다.
+  {
+    const d = path.join(out, 'talk'); fs.mkdirSync(d, { recursive: true });
+    fs.writeFileSync(path.join(d, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta http-equiv="refresh" content="3;url=../"><title>임지형 작품 서가</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#555;background:#fff}@media (prefers-color-scheme:dark){body{background:#1b1d1c;color:#bbb}}a{color:inherit}</style></head><body><p>서가로 가는 중… <a href="../">바로 가기</a></p><script>(function(){var g=function(){location.replace('/')};if(document.readyState==='complete')setTimeout(g,350);else addEventListener('load',function(){setTimeout(g,350)});setTimeout(g,1500)})()</script></body></html>`);
+  }
   // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html
   if (URL0) {
     const urls = [URL0, URL0 + 'news/', ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
     fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
-    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /go/\nSitemap: ${URL0}sitemap.xml\n`);
+    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /talk/\nSitemap: ${URL0}sitemap.xml\n`);
   }
   // 새 책 소식 소개 쪽 (2026-11-11, 시안 시안/새책소식_v1/). 부부작당 공용 소식, 단추는 스티비 구독 화면으로
   {

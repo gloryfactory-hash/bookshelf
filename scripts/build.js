@@ -133,7 +133,7 @@ function staticDetail(h, b, topicHref = () => null) {
   rows.push(['출판사', b.pub]); if (b.isbn) rows.push(['ISBN', b.isbn]);
   fill('<div class="dbib" id="dBib">', '<h3>도서 정보</h3><dl>' + rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('') + '</dl>');
   const shops = [['yes24', 'YES24'], ['kyobo', '교보문고'], ['aladin', '알라딘']].filter(([k]) => /^https:\/\//.test(b.links[k] || ''));
-  if (shops.length) fill('<div class="dbuy" id="dBuy">', '<h3>서점에서 보기</h3><div class="shops">' + shops.map(([k, l]) => `<a href="${esc(b.links[k])}" target="_blank" rel="noopener">${esc(l)}</a>`).join('') + '</div>');
+  if (shops.length) fill('<div class="dbuy" id="dBuy">', '<h3>서점에서 보기</h3><div class="shops">' + shops.map(([k, l]) => `<a href="go/${k}/${esc(b.isbn || b.id)}/" target="_blank" rel="noopener">${esc(l)}</a>`).join('') + '</div>');
   return h;
 }
 // 책 정보 구조화 데이터(schema.org Book). 검색 결과에 책 정보로 보이게 돕는다.
@@ -323,11 +323,18 @@ for (const site of sites) {
         (URL0 ? '\n<script type="application/ld+json">' + safeJson({ '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${pg.h} · ${site.title}`, url: URL0 + encodeURI(pg.p) + '/', inLanguage: 'ko', description: pg.t,
           mainEntity: { '@type': 'ItemList', numberOfItems: pg.books.length, itemListElement: pg.books.map((b, i) => ({ '@type': 'ListItem', position: i + 1, url: URL0 + keyOf(b) + '/', name: b.title })) } }) + '</script>' : ''))));
   }
+  // 서점으로 거쳐 가는 쪽 (2026-11-16): go/<서점>/<ISBN>/. 방문 통계(Cloudflare Web Analytics)가 페이지 보기로 세어
+  // '어느 책에서 어느 서점으로 몇 번 나갔는지'를 볼 수 있게 한다. 통계 스크립트가 보낼 틈을 주려고 load 뒤 잠깐 기다렸다 넘긴다.
+  for (const b of list) for (const k of ['yes24', 'kyobo', 'aladin']) {
+    const u = b.links[k]; if (!u || !/^https:\/\//.test(u)) continue;
+    const d = path.join(out, 'go', k, String(keyOf(b))); fs.mkdirSync(d, { recursive: true });
+    fs.writeFileSync(path.join(d, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer-when-downgrade"><meta http-equiv="refresh" content="3;url=${esc(u)}"><title>${esc(b.title)} · 서점으로 가는 중</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#555;background:#fff}@media (prefers-color-scheme:dark){body{background:#1b1d1c;color:#bbb}}a{color:inherit}</style></head><body><p>서점으로 가는 중… <a href="${esc(u)}">바로 가기</a></p><script>(function(){var u=${safeJson(u)},g=function(){location.replace(u)};if(document.readyState==='complete')setTimeout(g,350);else addEventListener('load',function(){setTimeout(g,350)});setTimeout(g,1500)})()</script></body></html>`);
+  }
   // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html
   if (URL0) {
     const urls = [URL0, URL0 + 'news/', ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
     fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
-    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${URL0}sitemap.xml\n`);
+    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /go/\nSitemap: ${URL0}sitemap.xml\n`);
   }
   // 새 책 소식 소개 쪽 (2026-11-11, 시안 시안/새책소식_v1/). 부부작당 공용 소식, 단추는 스티비 구독 화면으로
   {

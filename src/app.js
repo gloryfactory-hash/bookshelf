@@ -614,7 +614,7 @@ function fillDetail(b) {
   const buy = $('dBuy'), shops = el('div', 'shops'); buy.textContent = '';
   for (const [k, label] of [['yes24', 'YES24'], ['kyobo', '교보문고'], ['aladin', '알라딘']]) {
     const u = b.links[k]; if (!u || !/^https:\/\//.test(u)) continue;
-    const a = el('a', null, label); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', label + '에서 보기 (새 창)'); shops.append(a);
+    const a = el('a', null, label); a.href = 'go/' + k + '/' + (b.isbn || b.id) + '/'; /* 거쳐 가는 쪽으로 서점 나감을 센다(2026-11-16) */ a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', label + '에서 보기 (새 창)'); shops.append(a);
   }
   if (shops.children.length) buy.append(el('h3', null, '서점에서 보기'), shops);
   const ph = 474 / b.a;

@@ -617,6 +617,12 @@ function fillDetail(b) {
     const a = el('a', null, label); a.href = 'go/' + k + '/' + (b.isbn || b.id) + '/'; /* 거쳐 가는 쪽으로 서점 나감을 센다(2026-11-16) */ a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', label + '에서 보기 (새 창)'); shops.append(a);
   }
   if (shops.children.length) buy.append(el('h3', null, '서점에서 보기'), shops);
+  // 수업 자료 (2026-11-17): sites/<slug>.json materials가 있는 책만. 짧은 주소(<서가>/수업/…/)를 거쳐 자료로 간다
+  const matBox = $('dMat'), mat = (SITE.materials || []).find(m => m.book === b.isbn || m.book === b.id); matBox.textContent = '';
+  if (mat) {
+    const a = el('a', null, mat.label); a.href = mat.path + '/'; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', mat.label + ' (새 창)');
+    matBox.append(el('h3', null, '수업 자료'), a); if (mat.note) matBox.append(el('p', null, mat.note));
+  }
   const ph = 474 / b.a;
   poster.setAttribute('viewBox', `0 0 474 ${ph.toFixed(1)}`); pcr.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('href', b.img);
   circles.forEach(([x, y], k) => { circEls[k].setAttribute('cx', x); circEls[k].setAttribute('cy', (y * ph / 900).toFixed(1)); circEls[k].setAttribute('r', 0); });

@@ -45,6 +45,11 @@ let BOOKS = [...RECENT, ...ALL.filter(b => b.feat && !RECENT.includes(b)).sort(n
 if (BOOKS.length < 8) BOOKS = ALL.slice().sort(newestFirst); // 책이 적은 서가는 진열대에 전부 꽂는다
 // 첫 화면 가운데 책: 대표 책(SITE.lead, sites/*.json leadBook)이 있으면 그 책, 없으면 가장 최근 책 (2026-11-08)
 if (SITE.lead && BYID.has(SITE.lead) && !BOOKS.some(b => b.id === SITE.lead)) BOOKS.unshift(BYID.get(SITE.lead));
+// 가운데 책 오른쪽 자리(2026-11-18 사용자 "원모어 오른쪽에"): sites/*.json besideLead에 적은 책을 가운데 책 바로 다음에 꽂는다.
+if (SITE.lead && SITE.besideLead && BYID.has(SITE.besideLead) && SITE.besideLead !== SITE.lead) {
+  const nb = BYID.get(SITE.besideLead); BOOKS = BOOKS.filter(b => b !== nb);
+  BOOKS.splice(BOOKS.findIndex(b => b.id === SITE.lead) + 1, 0, nb);
+}
 const N = BOOKS.length, COPIES = Math.max(2, Math.ceil(30 / N)), TOT = N * COPIES, P = 1400;
 const START = SITE.lead ? Math.max(0, BOOKS.findIndex(b => b.id === SITE.lead)) : 0;
 const $ = id => document.getElementById(id);

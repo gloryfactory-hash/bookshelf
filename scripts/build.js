@@ -253,7 +253,7 @@ for (const site of sites) {
     return { ...m, path: p, label: m.label || '수업 자료 받기' };
   });
   const matOf = b => mats.find(m => m.book === b.isbn || m.book === b.id) || null;
-  const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, besideLead: site.besideLead ? (list.find(b => b.isbn === site.besideLead || b.id === site.besideLead) || {}).id || null : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', materials: mats.map(({ href: _h, ...m }) => m), targets: vocab.targets, keywords: vocab.keywords };
+  const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, besideLead: site.besideLead ? (list.find(b => b.isbn === site.besideLead || b.id === site.besideLead) || {}).id || null : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', materials: mats.map(({ href: _h, ...m }) => m), landings: (site.landings || []).map(m => { if (!list.some(b => b.isbn === m.book || b.id === m.book)) throw new Error('특별 페이지의 책을 못 찾음: ' + m.book); return { book: m.book, path: String(m.path).replace(/^\/+|\/+$/g, ''), label: m.label || '특별 페이지 보기', note: m.note || '' }; }), targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl
     .replaceAll('{{TITLE}}', esc(site.title))
     .replaceAll('{{DESCRIPTION}}', esc(site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`))

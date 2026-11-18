@@ -622,6 +622,9 @@ function fillDetail(b) {
     const a = el('a', null, label); a.href = 'go/' + k + '/' + (b.isbn || b.id) + '/'; /* 거쳐 가는 쪽으로 서점 나감을 센다(2026-11-16) */ a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', label + '에서 보기 (새 창)'); shops.append(a);
   }
   if (shops.children.length) buy.append(el('h3', null, '서점에서 보기'), shops);
+  // 책 특별 페이지 (2026-11-18 사용자 "랜딩페이지로 갈 수 있게"): sites/<slug>.json landings에 있는 책만. 같은 서가 안 주소라 같은 탭으로 간다
+  const landBox = $('dLand'), land = (SITE.landings || []).find(m => m.book === b.isbn || m.book === b.id); landBox.textContent = '';
+  if (land) { const a = el('a', null, land.label); a.href = land.path + '/'; landBox.append(el('h3', null, '이 책 더 알아보기'), a); if (land.note) landBox.append(el('p', null, land.note)); }
   // 수업 자료 (2026-11-17): sites/<slug>.json materials가 있는 책만. 짧은 주소(<서가>/수업/…/)를 거쳐 자료로 간다
   const matBox = $('dMat'), mat = (SITE.materials || []).find(m => m.book === b.isbn || m.book === b.id); matBox.textContent = '';
   if (mat) {

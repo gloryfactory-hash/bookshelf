@@ -19,6 +19,10 @@
   "runner": true,
   "leadBook": "9788968971464",
   "besideLead": "9788911732012",
+  "landings": [
+    { "book": "9788968971464", "path": "onemore", "label": "특별 페이지 보기", "note": "배구부 여섯 아이 가운데 우리 아이를 닮은 아이를 골라 보세요." },
+    { "book": "9791167031884", "path": "bulan", "label": "특별 페이지 보기", "note": "괜찮은 척하는 아이 곁에 놓아 줄 소설집, 네 작가의 이야기를 소개해요." }
+  ],
   "materials": [
     { "book": "9791168418042", "path": "수업/팩폭러", "href": "https://drive.google.com/drive/folders/1UDvTY5_oyriOhy4kpAflKkGm6IhIBDfx", "label": "수업 영상·활동지 받기", "note": "강연·수업 영상 6개, 선생님 안내문, 독서 후 활동지(A4 4쪽). 학교·도서관에서 자유롭게 트셔도 돼요." }
   ],

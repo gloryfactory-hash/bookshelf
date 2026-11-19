@@ -27,11 +27,13 @@ export async function aiCheck(env, name, body) {
         { role: 'user', content: `이름: ${name}\n글: ${body}` },
       ], max_tokens: 60, temperature: 0,
     });
-    const m = String(r.response || '').match(/\{[^}]*\}/);
-    const o = m ? JSON.parse(m[0]) : null;
+    // 답이 글자로 올 때도, 이미 풀린 객체로 올 때도 있다(2026-11-19 확인)
+    const raw = r?.response ?? r?.choices?.[0]?.message?.content ?? r;
+    let o = raw && typeof raw === 'object' && 'v' in raw ? raw : null;
+    if (!o) { const m = String(typeof raw === 'string' ? raw : JSON.stringify(raw)).match(/\{[^{}]*"v"[^{}]*\}/); o = m ? JSON.parse(m[0]) : null; }
     if (!o || o.v !== 'ok') return 'AI: ' + (o?.why || '판단 못 함');
     return null;
-  } catch { return 'AI 검사 실패'; }
+  } catch (e) { return 'AI 검사 실패: ' + String(e?.message || e).slice(0, 80); }
 }
 
 export async function notify(env, e) {

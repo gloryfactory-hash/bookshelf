@@ -37,12 +37,13 @@ export async function aiCheck(env, name, body) {
 }
 
 export async function notify(env, e) {
-  if (!env.RESEND_KEY || !env.NOTIFY_TO) return;
+  if (!env.RESEND_KEY || !env.NOTIFY_TO) return '메일 설정 없음';
   const to = env.NOTIFY_TO.split(',').map(s => s.trim()).filter(Boolean);
   const admin = (env.SITE_URL || 'https://limjh.kr/') + 'guestbook/admin/';
   const text = `방명록에 확인할 글이 들어왔어요 (보류 까닭: ${e.reason})\n\n이름: ${e.name}\n글: ${e.body}\n\n관리 화면: ${admin}\n(관리 열쇠는 처음 한 번만 넣으면 그 브라우저가 기억해요)`;
-  await fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_KEY, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: env.MAIL_FROM || '서가 방명록 <onboarding@resend.dev>', to, subject: '[서가 방명록] 확인할 글 1개', text }) }).catch(() => {});
+  return fetch('https://api.resend.com/emails', { method: 'POST', headers: { authorization: 'Bearer ' + env.RESEND_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({ from: env.MAIL_FROM || '서가 방명록 <onboarding@resend.dev>', to, subject: '[서가 방명록] 확인할 글 1개', text }) })
+    .then(async r => r.ok ? '보냄' : '메일 실패 ' + r.status + ' ' + (await r.text()).slice(0, 120)).catch(e => '메일 실패 ' + String(e?.message || e).slice(0, 80));
 }
 
 export async function ipHash(req) {

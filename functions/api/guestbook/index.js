@@ -29,7 +29,7 @@ export async function onRequestPost({ request, env }) {
 
   const reason = ruleCheck(name + '\n' + body) || await aiCheck(env, name, body);
   const status = reason ? 'held' : 'public';
-  await env.DB.prepare('INSERT INTO entries (site,name,body,status,reason,ip,created_at) VALUES (?,?,?,?,?,?,?)').bind(SITE, name, body, status, reason, ip, now).run();
-  if (reason) await notify(env, { name, body, reason });
+  const ins = await env.DB.prepare('INSERT INTO entries (site,name,body,status,reason,ip,created_at) VALUES (?,?,?,?,?,?,?)').bind(SITE, name, body, status, reason, ip, now).run();
+  if (reason) { const m = await notify(env, { name, body, reason }); if (m !== '보냄') await env.DB.prepare('UPDATE entries SET reason=? WHERE id=?').bind(reason + ' / ' + m, ins.meta.last_row_id).run(); }
   return json({ status });
 }

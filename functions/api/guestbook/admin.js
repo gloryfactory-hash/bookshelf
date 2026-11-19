@@ -1,4 +1,4 @@
-import { SITE, json, isAdmin } from './_lib.js';
+import { SITE, json, isAdmin, notify } from './_lib.js';
 // 관리: GET 목록(보류·공개), POST { id, action: publish|remove|reply, reply, by }
 export async function onRequestGet({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리 열쇠가 맞지 않아요.' }, 401);
@@ -8,6 +8,7 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   if (!isAdmin(request, env)) return json({ error: '관리 열쇠가 맞지 않아요.' }, 401);
   const d = await request.json().catch(() => ({})), id = Number(d.id);
+  if (d.action === 'testmail') return json({ mail: await notify(env, { name: '시험', body: '알림 메일 시험이에요.', reason: '시험' }) });
   if (!id) return json({ error: '글 번호가 없어요.' }, 400);
   if (d.action === 'publish') await env.DB.prepare("UPDATE entries SET status='public' WHERE id=? AND site=?").bind(id, SITE).run();
   else if (d.action === 'remove') await env.DB.prepare("UPDATE entries SET status='removed' WHERE id=? AND site=?").bind(id, SITE).run();

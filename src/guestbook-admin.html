@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>방명록 관리</title>
+<style>
+:root{--paper:#EDF0EE;--sheet:#F5F7F5;--ink:#1E2421;--muted:#5E6661;--accent:#9c5a26;--hair:rgba(30,36,33,.16);--held:#a2321f;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--paper:#171B19;--sheet:#1F2522;--ink:#E9ECE9;--muted:#A2AAA5;--accent:#E3A03E;--hair:rgba(233,236,233,.16);--held:#f08a72;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:500 16px/1.6 system-ui,sans-serif;word-break:keep-all}
+main{max-width:760px;margin:0 auto;padding:24px 16px 64px}h1{font-size:22px;margin:0 0 16px}
+.key{display:flex;gap:8px;margin:0 0 20px}input,textarea{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--hair);border-radius:2px;padding:10px 12px;width:100%}
+button{font:inherit;font-weight:700;min-height:44px;padding:0 16px;border:1px solid var(--hair);border-radius:3px;background:var(--sheet);color:var(--ink);cursor:pointer}
+button.pri{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+.it{background:var(--sheet);border:1px solid var(--hair);padding:16px;margin:0 0 12px}.it.held{border-left:4px solid var(--held)}
+.meta{font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}.meta .st{font-weight:700;color:var(--held)}.it:not(.held) .st{color:var(--muted)}
+.body{white-space:pre-wrap;margin:8px 0 12px;overflow-wrap:anywhere}.acts{display:flex;gap:8px;flex-wrap:wrap}
+.rp{display:grid;gap:8px;margin:12px 0 0}.rp textarea{min-height:64px}.msg{color:var(--muted)}
+</style>
+</head>
+<body><main>
+<h1>방명록 관리</h1>
+<form class="key" id="kf"><input id="k" type="password" placeholder="관리 열쇠" autocomplete="current-password"><button>열기</button></form>
+<p class="msg" id="msg">관리 열쇠를 넣으면 이 브라우저가 기억해요.</p>
+<label class="msg">답글 쓰는 사람 <select id="by"><option>임지형</option><option>김민성</option></select></label>
+<div id="list"></div>
+</main>
+<script>
+(() => {
+  const API = '../../api/guestbook/admin', $ = id => document.getElementById(id);
+  let key = ''; try { key = localStorage.getItem('gbKey') || ''; } catch {}
+  try { $('by').value = localStorage.getItem('gbBy') || '임지형'; } catch {}
+  $('by').onchange = () => { try { localStorage.setItem('gbBy', $('by').value); } catch {} };
+  const call = (m, b) => fetch(API, { method: m, headers: { 'x-admin-key': key, 'content-type': 'application/json' }, body: b && JSON.stringify(b) }).then(async r => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '실패'); return d; });
+  const day = t => new Date(t).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' });
+  async function load() {
+    if (!key) return;
+    try {
+      const d = await call('GET'); const L = $('list'); L.textContent = '';
+      const held = d.items.filter(e => e.status === 'held').length;
+      $('msg').textContent = `확인할 글 ${held}개 · 공개 글 ${d.items.length - held}개`;
+      d.items.forEach(e => {
+        const el = document.createElement('div'); el.className = 'it' + (e.status === 'held' ? ' held' : '');
+        el.innerHTML = '<div class="meta"><span class="st"></span><b class="nm"></b><span class="tm"></span></div><p class="body"></p><div class="acts"></div><div class="rp"><textarea placeholder="답글 (비우고 저장하면 지워져요)"></textarea><div><button class="sv">답글 저장</button></div></div>';
+        el.querySelector('.st').textContent = e.status === 'held' ? '보류 · ' + (e.reason || '') : '공개';
+        el.querySelector('.nm').textContent = e.name; el.querySelector('.tm').textContent = day(e.created_at);
+        el.querySelector('.body').textContent = e.body; el.querySelector('textarea').value = e.reply || '';
+        const A = el.querySelector('.acts'), btn = (t, c, f) => { const b = document.createElement('button'); b.textContent = t; if (c) b.className = c; b.onclick = f; A.append(b); };
+        if (e.status === 'held') btn('올리기', 'pri', () => act(e.id, 'publish'));
+        btn(e.status === 'held' ? '지우기' : '내리기', '', () => confirm('이 글을 내릴까요?') && act(e.id, 'remove'));
+        el.querySelector('.sv').onclick = () => act(e.id, 'reply', { reply: el.querySelector('textarea').value, by: $('by').value });
+        L.append(el);
+      });
+    } catch (err) { $('msg').textContent = err.message; }
+  }
+  const act = (id, action, x) => call('POST', { id, action, ...x }).then(load).catch(err => alert(err.message));
+  $('kf').onsubmit = ev => { ev.preventDefault(); key = $('k').value.trim(); try { localStorage.setItem('gbKey', key); } catch {} load(); };
+  load();
+})();
+</script>
+</body></html>

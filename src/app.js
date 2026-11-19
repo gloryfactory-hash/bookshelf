@@ -631,6 +631,9 @@ function fillDetail(b) {
     const a = el('a', null, mat.label); a.href = mat.path + '/'; a.target = '_blank'; a.rel = 'noopener'; a.setAttribute('aria-label', mat.label + ' (새 창)');
     matBox.append(el('h3', null, '수업 자료'), a); if (mat.note) matBox.append(el('p', null, mat.note));
   }
+  // 방명록 한 줄 (2026-11-19 회의록): 책을 다 읽은 사람이 바로 남기게. 책 제목을 넘겨 글 첫머리에 채운다
+  const gbBox = $('dGb'); gbBox.textContent = '';
+  if (SITE.guestbook) { const a = el('a', null, '방명록에 한마디 남기기'); a.href = 'guestbook/?book=' + encodeURIComponent(b.title); gbBox.append(el('h3', null, '이 책 어떠셨나요?'), a); }
   const ph = 474 / b.a;
   poster.setAttribute('viewBox', `0 0 474 ${ph.toFixed(1)}`); pcr.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('height', ph.toFixed(1)); pimg.setAttribute('href', b.img);
   circles.forEach(([x, y], k) => { circEls[k].setAttribute('cx', x); circEls[k].setAttribute('cy', (y * ph / 900).toFixed(1)); circEls[k].setAttribute('r', 0); });

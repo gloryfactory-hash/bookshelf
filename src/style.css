@@ -302,6 +302,8 @@ button{background:none;border:0;padding:0}
 .dmat{display:grid;gap:8px;width:100%;justify-items:start}
 .dmat h3{margin:0;font-family:var(--kr);font-weight:700;font-size:var(--fs-2);color:var(--muted)}
 .dmat a{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 22px;border:1px solid var(--accent);color:var(--accent);font-family:var(--kr);font-weight:700;font-size:var(--fs-2);white-space:nowrap}
+.foot .fr>a.gb{gap:6px;padding-left:8px}
+.foot .fr>a.gb img{width:24px;height:24px;border-radius:50%;background:var(--sheet);flex:none}
 .dmat p{margin:0;max-width:440px;word-break:keep-all;text-wrap:pretty;font-family:var(--kr);font-size:var(--fs-1);line-height:1.6;color:var(--muted)}
 .dbar{display:none} /* 휴대폰 아래 고정 줄 [닫기][공유]. 컴퓨터에서는 위 단추를 쓴다 */
 .dposter{position:relative;height:calc(100vh - 170px);display:flex;align-items:center;justify-content:center;min-height:0}
@@ -471,7 +473,8 @@ button{background:none;border:0;padding:0}
   /* 아래 단추는 두 칸 같은 너비(하나뿐이면 꽉 차게). 트랙·학년 단추는 그대로 두고 단추만 맨 아래로 조금 내린다 */
   .foot{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
   .foot .fr{width:100%;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
-  .foot .fr>a{height:44px}
+  .foot .fr>a{height:44px;white-space:nowrap;padding:0 8px}
+  .foot .mh{display:none}
   .ain{grid-template-columns:1fr;gap:26px;padding:calc(80px + env(safe-area-inset-top,0px)) 16px 60px}
   .aphoto{position:relative;top:auto}
   .aframe{width:100%;max-height:60svh}

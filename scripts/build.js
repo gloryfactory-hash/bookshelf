@@ -253,7 +253,7 @@ for (const site of sites) {
     return { ...m, path: p, label: m.label || '수업 자료 받기' };
   });
   const matOf = b => mats.find(m => m.book === b.isbn || m.book === b.id) || null;
-  const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, besideLead: site.besideLead ? (list.find(b => b.isbn === site.besideLead || b.id === site.besideLead) || {}).id || null : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', materials: mats.map(({ href: _h, ...m }) => m), landings: (site.landings || []).map(m => { if (!list.some(b => b.isbn === m.book || b.id === m.book)) throw new Error('특별 페이지의 책을 못 찾음: ' + m.book); return { book: m.book, path: String(m.path).replace(/^\/+|\/+$/g, ''), label: m.label || '특별 페이지 보기', note: m.note || '' }; }), targets: vocab.targets, keywords: vocab.keywords };
+  const siteData = { pages: pages.map(({ books: _b, ...p }) => p), runner: !!site.runner, lead: site.leadBook ? shareBookOf(site, list).id : null, besideLead: site.besideLead ? (list.find(b => b.isbn === site.besideLead || b.id === site.besideLead) || {}).id || null : null, author: site.author, spineName: site.spineName || site.author, recentYears: site.recentYears || 2, recentCount: site.recentCount || null, note: site.note || '', guestbook: !!site.guestbook, materials: mats.map(({ href: _h, ...m }) => m), landings: (site.landings || []).map(m => { if (!list.some(b => b.isbn === m.book || b.id === m.book)) throw new Error('특별 페이지의 책을 못 찾음: ' + m.book); return { book: m.book, path: String(m.path).replace(/^\/+|\/+$/g, ''), label: m.label || '특별 페이지 보기', note: m.note || '' }; }), targets: vocab.targets, keywords: vocab.keywords };
   const html = tpl
     .replaceAll('{{TITLE}}', esc(site.title))
     .replaceAll('{{DESCRIPTION}}', esc(site.description || `${site.author} 작가의 작품 ${list.length}권을 대상 학년과 주제로 찾아볼 수 있는 서가`))
@@ -272,6 +272,7 @@ for (const site of sites) {
     .replace('{{TAGLINE}}', () => `<div class="ttl"><h1>${site.role ? `<span class="role">${esc(site.role)}</span>` : ''}${esc(site.author)}</h1>` +
       (site.tagline ? `<p><b>${esc(site.tagline[0])}</b>${esc(site.tagline[1] || '')}</p>` : '') + '</div>')
     .replace('{{NAV_ABOUT}}', () => site.about ? '<button id="navAbout" aria-pressed="false">작가 소개</button>' : '')
+    .replace('{{FOOT_GB}}', () => site.guestbook ? '<a class="gb" href="guestbook/"><img src="guestbook/face.webp?v=' + VER + '" alt="" width="24" height="24">방명록</a>' : '')
     .replace('{{FOOT_TALK}}', () => site.about?.contact ? '<a class="talk" href="#contact">강연 문의</a>' : '')
     .replace('{{ABOUT}}', () => aboutHtml(site, list, photo))
     .replaceAll('{{VER}}', VER)
@@ -357,7 +358,7 @@ for (const site of sites) {
   if (URL0) {
     const urls = [URL0, URL0 + 'news/', ...pages.map(pg => URL0 + encodeURI(pg.p) + '/'), ...list.map(b => URL0 + keyOf(b) + '/')];
     fs.writeFileSync(path.join(out, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(u => `<url><loc>${esc(u)}</loc></url>`).join('\n') + '\n</urlset>\n');
-    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /talk/\n${[...new Set(mats.map(m => m.path.split('/')[0]))].map(t => `Disallow: /${encodeURI(t)}/\n`).join('')}Sitemap: ${URL0}sitemap.xml\n`);
+    fs.writeFileSync(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /go/\nDisallow: /talk/\nDisallow: /guestbook/admin/\nDisallow: /api/\n${[...new Set(mats.map(m => m.path.split('/')[0]))].map(t => `Disallow: /${encodeURI(t)}/\n`).join('')}Sitemap: ${URL0}sitemap.xml\n`);
   }
   // 새 책 소식 소개 쪽 (2026-11-11, 시안 시안/새책소식_v1/). 부부작당 공용 소식, 단추는 스티비 구독 화면으로
   {
@@ -372,6 +373,17 @@ for (const site of sites) {
       .replaceAll('{{STIBEE}}', esc(CH.news))
       .replaceAll('{{FROM}}', esc(CH.newsFrom || CH.name))
       .replace('{{COVERS}}', () => order.map(b => `<figure><img src="../covers/${b.id}.webp?v=${VER}" alt="${esc(b.title)} 표지"><figcaption>${esc(b.title)}</figcaption></figure>`).join(''))));
+  }
+  // 방명록 (2026-11-19, 회의록). sites/<slug>.json의 guestbook: { turnstile: 사이트 키 }. 글은 functions/api/guestbook이 D1에 둔다
+  if (site.guestbook) {
+    fs.mkdirSync(path.join(out, 'guestbook', 'admin'), { recursive: true });
+    fs.writeFileSync(path.join(out, 'guestbook', 'index.html'), noPh(fs.readFileSync(P('src', 'guestbook.html'), 'utf8')
+      .replace('{{OG}}', () => URL0 ? `<link rel="canonical" href="${esc(URL0)}guestbook/">` : '')
+      .replaceAll('{{AUTHOR}}', esc(site.author))
+      .replaceAll('{{VER}}', VER)
+      .replaceAll('{{TURNSTILE}}', esc(site.guestbook.turnstile || '1x00000000000000000000AA'))));
+    for (const f of fs.readdirSync(P('src', 'guestbook'))) fs.copyFileSync(P('src', 'guestbook', f), path.join(out, 'guestbook', f));
+    fs.copyFileSync(P('src', 'guestbook-admin.html'), path.join(out, 'guestbook', 'admin', 'index.html'));
   }
   fs.writeFileSync(path.join(out, '404.html'), notFound(site.title, [[URL0 || './', site.title + ' 첫 화면으로']]));
   if (!URL0) console.warn(`[${site.slug}] 배포 주소(sites/${site.slug}.json의 "url")가 없어 미리보기 그림 태그를 넣지 않았습니다. 카카오톡 미리보기에 그림이 뜨지 않습니다.`);

@@ -76,6 +76,7 @@
 
 사용자가 노션에 직접 한 줄을 넣고 표지를 준 경우에는 4번의 노션 추가만 빼고 같은 순서로 한다.
 - 책 특별 페이지 링크(2026-11-18): `sites/<slug>.json`의 `landings`({ book: ISBN, path: 서가 안 주소, label, note })가 있는 책은 상세 화면 서점 줄 위에 '이 책 더 알아보기' 단추가 생긴다(같은 탭). 임지형은 ONE MORE!(onemore)·사실은 불안(bulan).
+- 방명록(2026-11-19, 회의는 회의록.md): `sites/<slug>.json`의 `guestbook: { turnstile: 사이트 키 }`가 있으면 build가 `<서가>/guestbook/`(src/guestbook.html, 그림 src/guestbook/)와 관리 화면 `guestbook/admin/`(noindex)을 만들고, 첫 화면 아래 단추 줄에 '방명록'(작가 얼굴), 책 상세 아래에 '이 책 어떠셨나요?'(글 첫머리에 책 제목)를 넣는다. 글은 `functions/api/guestbook/`(Pages Functions)이 D1 `bookshelf-guestbook`에 둔다. 규칙 검사 + Workers AI 검사를 통과하면 바로 공개, 걸리면 보류하고 Resend로 두 사람에게 메일(보내는 주소 guestbook@limjh.kr). 비밀 값(TURNSTILE_SECRET, ADMIN_KEY, NOTIFY_TO, RESEND_KEY)과 묶음(DB, AI)은 Cloudflare Pages `limjh` 설정에만 있다. 관리 열쇠는 `방명록_관리열쇠.txt`(올리지 않음). 배포 명령은 그대로(`functions/`를 wrangler가 함께 올린다). 표 만들기는 `db/guestbook.sql`.
 - 가운데 책 오른쪽 자리(2026-11-18): `sites/<slug>.json`의 `besideLead`(ISBN 또는 ID)에 적은 책을 가운데 책 바로 오른쪽에 꽂는다. 임지형은 무엇이든 이루어 드림.
 - 진열대(첫 화면 곡면 서가)에는 최근 `recentCount`권(지금 12권)이 최신순으로 앞에 꽂히고, 그 뒤에 나머지 `대표작`이 최신순으로 이어진다. 첫 화면 가운데는 `leadBook`(임지형은 ONE MORE!), 없으면 가장 최근 책이다. 신간이 나와 가운데 책을 바꾸려면 `leadBook`을 고치거나 지운다. 따로 손댈 것 없다. (`recentCount`가 없으면 최근 `recentYears`년 기준. 2026-11-08 결정)
 - 책 추가 작업에서는 `src/`를 고치지 않는다.

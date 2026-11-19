@@ -17,6 +17,7 @@
   "note": "책 정보와 표지는 출판사 및 서점 자료 기준",
   "draft": false,
   "runner": true,
+  "guestbook": { "turnstile": "0x4AAAAAAGH0EogwUwYvuDQV" },
   "leadBook": "9788968971464",
   "besideLead": "9788911732012",
   "landings": [

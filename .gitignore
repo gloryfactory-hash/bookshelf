@@ -11,3 +11,6 @@ shots/
 .impeccable/
 # 따로 만든 쪽(주인공 찾기 등). limjh.kr에만 올림
 extras/
+.dev.vars
+방명록_관리열쇠.txt
+.wrangler/

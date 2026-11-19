@@ -21,7 +21,7 @@ export function ruleCheck(t) { for (const [re, why] of RULES) if (re.test(t)) re
 export async function aiCheck(env, name, body) {
   if (!env.AI) return null;
   try {
-    const r = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+    const r = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [
         { role: 'system', content: '너는 어린이도 보는 동화 작가 방명록의 검토자다. 글이 아래 중 하나라도 해당하면 hold, 아니면 ok. 1) 욕설·비하·성적·폭력적 표현 2) 광고·홍보·스팸 3) 개인을 알아볼 수 있는 정보(실명+학교, 반, 연락처, 주소, SNS 아이디) 4) 다른 사람을 놀리거나 괴롭히는 말 5) 책·작가와 상관없는 이상한 글. 확신이 없으면 hold. 답은 JSON 한 줄만: {"v":"ok"} 또는 {"v":"hold","why":"짧은 까닭"}' },
         { role: 'user', content: `이름: ${name}\n글: ${body}` },

@@ -11,83 +11,102 @@
 @font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-display:swap}
 @font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900;font-display:swap}
 @font-face{font-family:'BookkMyungjo';src:url('../assets/fonts/BookkMyungjo-Lt.woff2') format('woff2');font-weight:400;font-display:swap}
+/* 방명록 '편지지' (2026-11-19 디자인 점검 뒤 사용자 결정). 모서리 2~3px, 그림자·투명도 없음, 글자 크기는 서가 토큰 */
 :root{
-  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --hair:rgba(30,36,33,.16);
-  --chip:rgba(227,160,62,.16); --green-deep:#2f6e4c; --err:#a2321f;
+  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --on:#F5F7F5; --hair:rgba(30,36,33,.16);
+  --step:color-mix(in srgb,#9c5a26 84%,#000); --chip:rgba(227,160,62,.16); --honey:#e3a03e; --green-deep:#2f6e4c; --err:#a2321f;
+  --fs-1:12px; --fs-2:14px; --fs-3:16.5px; --fs-4:22px; --fs-5:34px; --fs-body:22px;
   --sans:'Paperozi','Pretendard',system-ui,sans-serif; --serif:'BookkMyungjo','Noto Serif KR',serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --hair:rgba(233,236,233,.16); --green-deep:#86C6A2; --err:#f08a72; color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --hair:rgba(233,236,233,.16); --green-deep:#86C6A2; --err:#f08a72; color-scheme:dark}
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --on:#3a2206; --step:#f0b862; --hair:rgba(233,236,233,.16); --green-deep:#86C6A2; --err:#f08a72; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --on:#3a2206; --step:#f0b862; --hair:rgba(233,236,233,.16); --green-deep:#86C6A2; --err:#f08a72; color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;word-break:keep-all}
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.top{max-width:880px;margin:0 auto;padding:24px 24px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:700}
-.top a{text-decoration:none;color:var(--muted)}
-@media (hover:hover){.top a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}}
-main{max-width:880px;margin:0 auto;padding:48px 24px 72px}
-h1{font-size:clamp(30px,4vw,46px);font-weight:900;line-height:1.3;margin:0 0 14px;letter-spacing:0}
+.top{max-width:880px;margin:0 auto;padding:14px 24px 0;display:flex;justify-content:space-between;align-items:center;font-size:var(--fs-2);font-weight:700}
+.top a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--muted)}
+@media (hover:hover){.top a:hover{color:var(--ink);text-decoration:underline;text-decoration-color:var(--honey);text-decoration-thickness:2px;text-underline-offset:6px}}
+.top span{color:var(--muted)}
+main{max-width:880px;margin:0 auto;padding:40px 24px 72px}
+h1{font-size:var(--fs-5);font-weight:900;line-height:1.3;margin:0 0 14px;letter-spacing:0}
 h1 em{font-style:normal;color:var(--accent)}
-.hero{display:grid;grid-template-columns:1fr auto;grid-template-areas:'h me' 'l me';column-gap:24px;align-items:end;margin:0 0 32px}
+.hero{display:grid;grid-template-columns:1fr auto;grid-template-areas:'h me' 'l me';column-gap:24px;align-items:end;margin:0 0 36px}
 .hero h1{grid-area:h}.hero .lead{grid-area:l}.hero .me{grid-area:me}
-.me{margin:0;width:190px;text-align:center}
+.me{margin:0;width:180px;text-align:center}
 .me img{display:block;width:100%;height:auto;transform-origin:50% 90%}
-.me figcaption{font-size:14px;font-weight:700;color:var(--muted);margin-top:-6px}
+.me figcaption{font-size:var(--fs-2);font-weight:700;color:var(--muted);margin-top:-6px}
 @media (prefers-reduced-motion:no-preference){.me img{animation:hi 2.4s ease-in-out 1 .4s}}
 @keyframes hi{0%,100%{transform:rotate(0)}20%{transform:rotate(-4deg)}40%{transform:rotate(3deg)}60%{transform:rotate(-2deg)}80%{transform:rotate(1deg)}}
-.lead{font-size:18px;line-height:1.6;margin:0;color:var(--muted);max-width:34em}
+.lead{font-family:var(--serif);font-size:var(--fs-3);line-height:1.7;margin:0;color:var(--muted);max-width:34em}
 
-form{background:var(--sheet);border:1.5px solid var(--hair);border-radius:22px;box-shadow:0 14px 30px -22px rgba(60,40,20,.35);padding:28px;display:grid;gap:16px;margin:0 0 56px}
-label{display:grid;gap:8px;font-size:14px;font-weight:700}
-input,textarea{font:inherit;font-size:17px;color:var(--ink);background:var(--paper);border:1.5px solid var(--hair);border-radius:14px;padding:12px 16px;width:100%}
+/* 편지지: 받는 사람 줄, 우표, 공책 줄 */
+form{position:relative;background:var(--sheet);border:1px solid var(--hair);border-radius:3px;padding:30px 32px 26px;display:grid;gap:18px;margin:0 0 64px}
+.to{margin:0;padding:0 96px 12px 0;border-bottom:1px solid var(--hair);font-size:var(--fs-3);font-weight:700}
+.to span{color:var(--accent)}
+.stamp{position:absolute;top:18px;right:22px;width:68px;height:80px;margin:0;padding:6px;background:var(--chip);transform:rotate(4deg);
+  --perf:radial-gradient(circle 3px at 4px 4px,#0000 95%,#000) -4px -4px/8px 8px,linear-gradient(#000 0 0) center/calc(100% - 8px) calc(100% - 8px) no-repeat;
+  -webkit-mask:var(--perf);mask:var(--perf)}
+.stamp img{display:block;width:100%;height:100%;object-fit:cover;border:1px solid var(--accent);border-radius:1px;background:var(--sheet)}
+label{display:grid;gap:8px;font-size:var(--fs-2);font-weight:700}
+input,textarea{font:inherit;font-size:var(--fs-3);color:var(--ink);background:var(--paper);border:1px solid var(--hair);border-radius:2px;padding:12px 14px;width:100%}
 input{height:48px;max-width:20em}
-textarea{min-height:132px;resize:vertical;line-height:1.6}
-input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--chip)}
+textarea{--lh:30px;min-height:calc(var(--lh) * 5 + 24px);resize:vertical;font-family:var(--serif);line-height:var(--lh);padding:12px 14px;
+  background:var(--paper) repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh) - 1px),var(--hair) calc(var(--lh) - 1px) var(--lh)) local;background-position:0 12px}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.cnt{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cnt{font-size:var(--fs-2);color:var(--muted);font-variant-numeric:tabular-nums}
 .cnt.over{color:var(--err)}
-.help{font-size:14px;line-height:1.6;color:var(--muted);margin:0}
-button{font:inherit;font-weight:700;font-size:17px;height:48px;padding:0 30px;border:0;border-radius:999px;background:var(--accent);color:var(--sheet);cursor:pointer;transition:filter .2s}
-@media (hover:hover){button:hover{filter:brightness(.9)}}
-button[disabled]{opacity:.5;cursor:default}
-.msg{font-size:16px;line-height:1.6;margin:0;min-height:1.6em}
+.help{font-size:var(--fs-2);line-height:1.6;color:var(--muted);margin:0}
+button{font:inherit;font-weight:700;font-size:var(--fs-3);height:48px;padding:0 30px;border:1px solid var(--accent);border-radius:3px;background:var(--accent);color:var(--on);cursor:pointer;transition:background-color .2s,border-color .2s}
+@media (hover:hover){button:hover{background:var(--step);border-color:var(--step)}}
+button:focus-visible{background:var(--step)}
+button[disabled]{background:var(--muted);border-color:var(--muted);cursor:default}
+.msg{font-size:var(--fs-3);line-height:1.6;margin:0;min-height:1.6em}
 .msg.ok{color:var(--green-deep);font-weight:700}
 .msg.err{color:var(--err);font-weight:700}
 [hidden]{display:none!important}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 
-h2{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 4px;display:flex;gap:8px}
+h2{font-size:var(--fs-2);font-weight:700;color:var(--muted);margin:0 0 6px;display:flex;gap:8px}
 h2 .n{font-variant-numeric:tabular-nums}
-ol{list-style:none;margin:0;padding:0;border-top:1.5px dashed var(--hair)}
-li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
-.who{display:flex;gap:12px;align-items:baseline;font-size:14px;margin:0 0 8px}
-.who b{font-weight:700;font-size:16px}
-.who time{color:var(--muted)}
-.body{font-family:var(--serif);font-size:18px;line-height:1.75;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
-.reply{position:relative;margin:16px 0 0 18px;padding:14px 18px;background:var(--chip);border-radius:4px 18px 18px 18px;font-size:16px;line-height:1.6}
-.reply b{display:block;font-size:14px;color:var(--accent);margin:0 0 4px}
-.empty{color:var(--muted);font-size:16px;padding:28px 0}
-.more{margin:24px auto 0;display:block;background:transparent;color:var(--ink);border:1px solid var(--hair)}
+ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--hair)}
+li{padding:26px 0;border-bottom:1px solid var(--hair)}
+.who{display:flex;gap:12px;align-items:baseline;margin:0 0 10px}
+.who b{font-weight:700;font-size:var(--fs-3)}
+.who time{font-size:var(--fs-2);color:var(--muted)}
+.body{font-family:var(--serif);font-size:var(--fs-body);line-height:1.7;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+/* 작가의 쪽지 */
+.reply{margin:18px 0 0 20px;padding:14px 18px 16px;background:var(--chip);border-left:3px solid var(--honey);border-radius:2px;transform:rotate(-.4deg);max-width:36em}
+.reply .by{display:flex;align-items:center;gap:8px;font-size:var(--fs-2);font-weight:700;color:var(--accent);margin:0 0 6px}
+.reply .by img{width:28px;height:28px;border-radius:50%;background:var(--sheet)}
+.reply p{margin:0;font-size:var(--fs-3);line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.empty{display:flex;align-items:center;gap:16px;color:var(--muted);font-size:var(--fs-3);padding:28px 0}
+.empty img{width:72px;height:72px;flex:none}
+.more{margin:28px auto 0;display:block;background:var(--paper);color:var(--ink);border-color:var(--hair)}
+@media (hover:hover){.more:hover{background:var(--chip);border-color:var(--accent);color:var(--accent)}}
 @media (prefers-reduced-motion:reduce){button{transition:none}}
 @media (max-width:767px){
-  .top{padding:18px 16px 0}
-  main{padding:32px 16px 56px}
-  form{padding:18px}
+  :root{--fs-body:18px}
+  .top{padding:6px 16px 0}
+  main{padding:24px 16px 56px}
+  form{padding:22px 18px 20px}
+  .to{padding-right:72px}
+  .stamp{width:54px;height:64px;top:12px;right:14px}
   input{max-width:none}
   .row button{width:100%}
-  .hero{grid-template-columns:1fr 96px;grid-template-areas:'h me' 'l l';column-gap:8px;align-items:center;margin-bottom:24px}
-  .hero h1{font-size:28px}
+  .hero{grid-template-columns:1fr 96px;grid-template-areas:'h me' 'l l';column-gap:8px;align-items:center;margin-bottom:28px}
+  .hero h1{font-size:var(--fs-4)}
   .me{width:96px}
-  .me figcaption{font-size:12px}
-  .hero .lead{font-size:16.5px;margin-top:4px}
+  .reply{margin-left:8px}
 }
 </style>
 </head>
 <body>
 <header class="top">
-  <a href="../">← {{AUTHOR}} 서고로</a>
+  <a href="../">{{AUTHOR}} 서고로 돌아가기</a>
   <span>방명록</span>
 </header>
 <main>
@@ -97,7 +116,9 @@ li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
     <figure class="me"><img id="face" src="wave.webp?v={{VER}}" width="320" height="320" alt="손을 흔드는 임지형 작가 그림"><figcaption>임지형 작가</figcaption></figure>
   </div>
 
-  <form id="f" novalidate>
+  <form id="f" novalidate aria-label="방명록 글쓰기">
+    <p class="to">To. <span>{{AUTHOR}} 작가</span>님께</p>
+    <figure class="stamp" aria-hidden="true"><img src="face.webp?v={{VER}}" alt="" width="64" height="64"></figure>
     <label>이름이나 별명
       <input id="name" name="name" maxlength="20" autocomplete="nickname" placeholder="예: 책 좋아하는 4학년, 도서관 선생님" required>
     </label>
@@ -116,7 +137,7 @@ li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
 
   <section aria-labelledby="lh">
     <h2 id="lh">남겨 주신 이야기 <span class="n" id="n"></span></h2>
-    <ol id="list"><li class="empty">불러오는 중이에요…</li></ol>
+    <ol id="list"><li class="empty">편지를 꺼내는 중이에요…</li></ol>
     <button class="more" id="more" type="button" hidden>더 보기</button>
   </section>
 </main>
@@ -135,7 +156,7 @@ li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
     li.querySelector('b').textContent = e.name;
     const tm = li.querySelector('time'); tm.textContent = day(e.created_at); tm.dateTime = new Date(e.created_at).toISOString().slice(0, 10);
     li.querySelector('.body').textContent = e.body;
-    if (e.reply) { const r = document.createElement('div'); r.className = 'reply'; r.innerHTML = '<b></b><span></span>'; r.querySelector('b').textContent = e.reply_by || '작가'; r.querySelector('span').textContent = e.reply; li.append(r); }
+    if (e.reply) { const r = document.createElement('div'); r.className = 'reply'; r.innerHTML = '<p class="by"><img src="face.webp?v={{VER}}" alt="" width="28" height="28"><span></span></p><p></p>'; r.querySelector('.by span').textContent = (e.reply_by || '작가') + '의 쪽지'; r.querySelectorAll('p')[1].textContent = e.reply; li.append(r); }
     return li;
   };
   let before = '';
@@ -145,7 +166,7 @@ li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
       if (!r.ok) throw 0;
       const d = await r.json();
       if (first) { list.textContent = ''; $('n').textContent = d.total ? d.total + '개' : ''; }
-      if (first && !d.items.length) list.innerHTML = '<li class="empty">아직 남겨 주신 글이 없어요. 첫 이야기를 들려주세요.</li>';
+      if (first && !d.items.length) list.innerHTML = '<li class="empty"><img src="happy.webp?v={{VER}}" alt="" width="72" height="72">첫 편지를 기다리고 있어요. 가장 먼저 한마디 남겨 주세요.</li>';
       d.items.forEach(e => list.append(item(e)));
       before = d.next || ''; more.hidden = !d.next;
     } catch { if (first) list.innerHTML = '<li class="empty">글을 불러오지 못했어요. 잠시 뒤에 다시 와 주세요.</li>'; }
@@ -178,6 +199,7 @@ li{padding:24px 0;border-bottom:1.5px dashed var(--hair)}
     body.dispatchEvent(new Event('input'));
     $('name').focus();
   }
+  new Image().src = 'happy.webp?v={{VER}}';
   load(true);
 })();
 </script>

@@ -6,56 +6,127 @@
 <meta name="robots" content="noindex,nofollow">
 <title>방명록 관리</title>
 <style>
-:root{--paper:#EDF0EE;--sheet:#F5F7F5;--ink:#1E2421;--muted:#5E6661;--accent:#9c5a26;--hair:rgba(30,36,33,.16);--held:#a2321f;color-scheme:light}
-@media (prefers-color-scheme:dark){:root{--paper:#171B19;--sheet:#1F2522;--ink:#E9ECE9;--muted:#A2AAA5;--accent:#E3A03E;--hair:rgba(233,236,233,.16);--held:#f08a72;color-scheme:dark}}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:500 16px/1.6 system-ui,sans-serif;word-break:keep-all}
-main{max-width:760px;margin:0 auto;padding:24px 16px 64px}h1{font-size:22px;margin:0 0 16px}
-.key{display:flex;gap:8px;margin:0 0 20px}input,textarea{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--hair);border-radius:2px;padding:10px 12px;width:100%}
-button{font:inherit;font-weight:700;min-height:44px;padding:0 16px;border:1px solid var(--hair);border-radius:3px;background:var(--sheet);color:var(--ink);cursor:pointer}
-button.pri{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
-.it{background:var(--sheet);border:1px solid var(--hair);padding:16px;margin:0 0 12px}.it.held{border-left:4px solid var(--held)}
-.meta{font-size:14px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}.meta .st{font-weight:700;color:var(--held)}.it:not(.held) .st{color:var(--muted)}
-.body{white-space:pre-wrap;margin:8px 0 12px;overflow-wrap:anywhere}.acts{display:flex;gap:8px;flex-wrap:wrap}
-.rp{display:grid;gap:8px;margin:12px 0 0}.rp textarea{min-height:64px}.msg{color:var(--muted)}
+@font-face{font-family:'Paperozi';src:url('../../assets/fonts/Paperlogy-5Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../../assets/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../../assets/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900;font-display:swap}
+@font-face{font-family:'BookkMyungjo';src:url('../../assets/fonts/BookkMyungjo-Lt.woff2') format('woff2');font-weight:400;font-display:swap}
+/* 방명록 관리 (2026-11-19 디자인 점검 반영). 공개 방명록과 같은 토큰·글꼴 */
+:root{
+  --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --on:#F5F7F5; --hair:rgba(30,36,33,.16);
+  --step:color-mix(in srgb,#9c5a26 84%,#000); --chip:rgba(227,160,62,.16); --honey:#e3a03e; --held:#a2321f; --ok:#2f6e4c;
+  --fs-1:12px; --fs-2:14px; --fs-3:16.5px; --fs-4:22px;
+  --sans:'Paperozi','Pretendard',system-ui,sans-serif; --serif:'BookkMyungjo','Noto Serif KR',serif; color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#171B19;--sheet:#1F2522;--ink:#E9ECE9;--muted:#A2AAA5;--accent:#E3A03E;--on:#3a2206;--step:#f0b862;--hair:rgba(233,236,233,.16);--held:#f08a72;--ok:#86C6A2;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171B19;--sheet:#1F2522;--ink:#E9ECE9;--muted:#A2AAA5;--accent:#E3A03E;--on:#3a2206;--step:#f0b862;--hair:rgba(233,236,233,.16);--held:#f08a72;--ok:#86C6A2;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;font-size:var(--fs-3);line-height:1.6;-webkit-font-smoothing:antialiased;word-break:keep-all}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+main{max-width:760px;margin:0 auto;padding:28px 16px 72px}
+.head{display:flex;align-items:center;gap:12px;margin:0 0 18px}
+.head img{width:48px;height:48px;border-radius:50%;background:var(--sheet)}
+h1{font-size:var(--fs-4);font-weight:900;margin:0}
+.head a{margin-left:auto;font-size:var(--fs-2);font-weight:700;color:var(--muted);min-height:44px;display:inline-flex;align-items:center}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--sheet);border:1px solid var(--hair);border-radius:2px;padding:10px 12px;width:100%}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+button{font:inherit;font-weight:700;font-size:var(--fs-2);min-height:44px;padding:0 16px;border:1px solid var(--hair);border-radius:3px;background:var(--sheet);color:var(--ink);cursor:pointer;transition:background-color .2s,border-color .2s,color .2s}
+@media (hover:hover){button:not(.pri):hover{border-color:var(--accent);color:var(--accent);background:var(--chip)}button.pri:hover{background:var(--step);border-color:var(--step)}}
+button.pri{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.key{display:flex;gap:8px;margin:0 0 8px}
+.key input{min-height:44px}
+.msg{font-size:var(--fs-2);color:var(--muted);margin:0 0 16px}
+.bar{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 0 12px;border:1px solid var(--hair);border-radius:3px;overflow:hidden}
+.bar button{border:0;border-radius:0;background:var(--sheet)}
+.bar button+button{border-left:1px solid var(--hair)}
+.bar button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.bar .n{font-variant-numeric:tabular-nums;margin-left:4px}
+.by{display:flex;align-items:center;gap:8px;font-size:var(--fs-2);font-weight:700;color:var(--muted);margin:0 0 16px}
+.by .seg{display:inline-grid;grid-template-columns:1fr 1fr;border:1px solid var(--hair);border-radius:3px;overflow:hidden}
+.by .seg button{border:0;border-radius:0;min-width:84px}
+.by .seg button[aria-pressed="true"]{background:var(--chip);color:var(--accent)}
+.it{background:var(--sheet);border:1px solid var(--hair);border-radius:3px;padding:16px 16px 14px;margin:0 0 12px}
+.it.held{border-left:3px solid var(--held)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:var(--fs-2);color:var(--muted)}
+.meta b{font-size:var(--fs-3);color:var(--ink)}
+.meta .why{color:var(--held);font-weight:700;width:100%}
+.body{font-family:var(--serif);font-size:var(--fs-3);line-height:1.7;margin:8px 0 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.note{margin:0 0 12px 8px;padding:10px 14px;background:var(--chip);border-left:3px solid var(--honey);border-radius:2px;font-size:var(--fs-2);line-height:1.6;white-space:pre-wrap}
+.note b{display:block;color:var(--accent)}
+.acts{display:flex;gap:8px}
+.acts button{flex:1}
+.rp{display:grid;gap:8px;margin:12px 0 0}
+.rp textarea{min-height:88px;font-family:var(--serif);line-height:1.6}
+.rp div{display:flex;gap:8px;justify-content:flex-end}
+.saved{color:var(--ok);font-weight:700;font-size:var(--fs-2);align-self:center;margin-right:auto}
+.none{color:var(--muted);padding:24px 0;text-align:center}
+@media (prefers-reduced-motion:reduce){button{transition:none}}
 </style>
 </head>
 <body><main>
-<h1>방명록 관리</h1>
-<form class="key" id="kf"><input id="k" type="password" placeholder="관리 열쇠" autocomplete="current-password"><button>열기</button></form>
+<div class="head"><img src="../face.webp" alt="" width="48" height="48"><h1>방명록 관리</h1><a href="../">방명록 보기</a></div>
+<form class="key" id="kf"><input id="k" type="password" placeholder="관리 열쇠" aria-label="관리 열쇠" autocomplete="current-password"><button class="pri">열기</button></form>
 <p class="msg" id="msg">관리 열쇠를 넣으면 이 브라우저가 기억해요.</p>
-<label class="msg">답글 쓰는 사람 <select id="by"><option>임지형</option><option>김민성</option></select></label>
-<div id="list"></div>
+<div id="app" hidden>
+  <div class="bar" role="group" aria-label="글 고르기"><button id="tHeld" type="button" aria-pressed="true">확인할 글<span class="n" id="nHeld"></span></button><button id="tPub" type="button" aria-pressed="false">공개 글<span class="n" id="nPub"></span></button></div>
+  <div class="by">답글 쓰는 사람 <span class="seg" role="group" aria-label="답글 쓰는 사람"><button type="button" data-by="임지형">임지형</button><button type="button" data-by="김민성">김민성</button></span></div>
+  <div id="list"></div>
+</div>
 </main>
 <script>
 (() => {
   const API = '../../api/guestbook/admin', $ = id => document.getElementById(id);
-  let key = ''; try { key = localStorage.getItem('gbKey') || ''; } catch {}
-  try { $('by').value = localStorage.getItem('gbBy') || '임지형'; } catch {}
-  $('by').onchange = () => { try { localStorage.setItem('gbBy', $('by').value); } catch {} };
-  const call = (m, b) => fetch(API, { method: m, headers: { 'x-admin-key': key, 'content-type': 'application/json' }, body: b && JSON.stringify(b) }).then(async r => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '실패'); return d; });
+  const store = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v); } catch { return null; } };
+  let key = store('gbKey') || '', by = store('gbBy') || '임지형', tab = 'held', items = [], open = null;
+  const setBy = v => { by = v; store('gbBy', v); document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.by === v)); };
+  document.querySelectorAll('.seg button').forEach(b => b.onclick = () => setBy(b.dataset.by)); setBy(by);
+  const setTab = t => { tab = t; $('tHeld').setAttribute('aria-pressed', t === 'held'); $('tPub').setAttribute('aria-pressed', t === 'pub'); draw(); };
+  $('tHeld').onclick = () => setTab('held'); $('tPub').onclick = () => setTab('pub');
+  const call = (m, b) => fetch(API, { method: m, headers: { 'x-admin-key': key, 'content-type': 'application/json' }, body: b && JSON.stringify(b) })
+    .then(async r => { const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || '실패했어요'); return d; });
   const day = t => new Date(t).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' });
+  const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const btn = (t, cls, f) => { const b = mk('button', cls, t); b.type = 'button'; b.onclick = f; return b; };
+
   async function load() {
     if (!key) return;
     try {
-      const d = await call('GET'); const L = $('list'); L.textContent = '';
-      const held = d.items.filter(e => e.status === 'held').length;
-      $('msg').textContent = `확인할 글 ${held}개 · 공개 글 ${d.items.length - held}개`;
-      d.items.forEach(e => {
-        const el = document.createElement('div'); el.className = 'it' + (e.status === 'held' ? ' held' : '');
-        el.innerHTML = '<div class="meta"><span class="st"></span><b class="nm"></b><span class="tm"></span></div><p class="body"></p><div class="acts"></div><div class="rp"><textarea placeholder="답글 (비우고 저장하면 지워져요)"></textarea><div><button class="sv">답글 저장</button></div></div>';
-        el.querySelector('.st').textContent = e.status === 'held' ? '보류 · ' + (e.reason || '') : '공개';
-        el.querySelector('.nm').textContent = e.name; el.querySelector('.tm').textContent = day(e.created_at);
-        el.querySelector('.body').textContent = e.body; el.querySelector('textarea').value = e.reply || '';
-        const A = el.querySelector('.acts'), btn = (t, c, f) => { const b = document.createElement('button'); b.textContent = t; if (c) b.className = c; b.onclick = f; A.append(b); };
-        if (e.status === 'held') btn('올리기', 'pri', () => act(e.id, 'publish'));
-        btn(e.status === 'held' ? '지우기' : '내리기', '', () => confirm('이 글을 내릴까요?') && act(e.id, 'remove'));
-        el.querySelector('.sv').onclick = () => act(e.id, 'reply', { reply: el.querySelector('textarea').value, by: $('by').value });
-        L.append(el);
-      });
-    } catch (err) { $('msg').textContent = err.message; }
+      items = (await call('GET')).items;
+      $('app').hidden = false; $('kf').hidden = true; $('msg').textContent = '';
+      const h = items.filter(e => e.status === 'held').length;
+      $('nHeld').textContent = h; $('nPub').textContent = items.length - h;
+      if (!h && tab === 'held' && !load.once) tab = 'pub';
+      load.once = true; setTab(tab);
+    } catch (err) { $('msg').textContent = err.message; $('kf').hidden = false; }
   }
-  const act = (id, action, x) => call('POST', { id, action, ...x }).then(load).catch(err => alert(err.message));
-  $('kf').onsubmit = ev => { ev.preventDefault(); key = $('k').value.trim(); try { localStorage.setItem('gbKey', key); } catch {} load(); };
+  function draw() {
+    const L = $('list'), y = scrollY; L.textContent = '';
+    const show = items.filter(e => (e.status === 'held') === (tab === 'held'));
+    if (!show.length) L.append(mk('p', 'none', tab === 'held' ? '확인할 글이 없어요.' : '공개된 글이 없어요.'));
+    show.forEach(e => {
+      const it = mk('div', 'it' + (e.status === 'held' ? ' held' : ''));
+      const meta = mk('div', 'meta'); meta.append(mk('b', null, e.name), mk('span', null, day(e.created_at)));
+      if (e.status === 'held') meta.append(mk('span', 'why', '보류 까닭: ' + (e.reason || '알 수 없음')));
+      it.append(meta, mk('p', 'body', e.body));
+      if (e.reply && open !== e.id) { const n = mk('div', 'note'); n.append(mk('b', null, (e.reply_by || '작가') + '의 쪽지'), document.createTextNode(e.reply)); it.append(n); }
+      const acts = mk('div', 'acts');
+      if (e.status === 'held') acts.append(btn('지우기', '', () => confirm('이 글을 지울까요? 방명록에 보이지 않게 돼요.') && act(e.id, 'remove')), btn('올리기', 'pri', () => act(e.id, 'publish')));
+      else acts.append(btn('내리기', '', () => confirm('이 글을 방명록에서 내릴까요?') && act(e.id, 'remove')), btn(e.reply ? '쪽지 고치기' : '답글 쓰기', '', () => { open = e.id; draw(); }));
+      it.append(acts);
+      if (open === e.id) {
+        const rp = mk('div', 'rp'), ta = mk('textarea'); ta.value = e.reply || ''; ta.placeholder = '작가의 쪽지 (비우고 저장하면 지워져요)'; ta.maxLength = 300;
+        const row = mk('div'), ok = mk('span', 'saved');
+        row.append(ok, btn('닫기', '', () => { open = null; draw(); }), btn('저장', 'pri', async () => {
+          try { await call('POST', { id: e.id, action: 'reply', reply: ta.value, by }); e.reply = ta.value.trim() || null; e.reply_by = by + ' 작가'; open = null; draw(); }
+          catch (err) { ok.textContent = err.message; }
+        }));
+        rp.append(ta, row); it.append(rp); setTimeout(() => ta.focus(), 0);
+      }
+      L.append(it);
+    });
+    scrollTo(0, y);
+  }
+  const act = (id, action) => call('POST', { id, action }).then(load).catch(err => alert(err.message));
+  $('kf').onsubmit = ev => { ev.preventDefault(); key = $('k').value.trim(); store('gbKey', key); load(); };
   load();
 })();
 </script>

@@ -249,7 +249,9 @@ for (const site of sites) {
   const mats = (site.materials || []).map(m => {
     const p = String(m.path || '').normalize('NFC').replace(/^\/+|\/+$/g, '');
     if (!list.some(b => b.isbn === m.book || b.id === m.book)) throw new Error('수업 자료의 책을 못 찾음: ' + m.book);
-    if (!/^https:\/\//.test(m.href || '') || !p || /[.]{2}|[?#]/.test(p)) throw new Error('수업 자료 주소가 이상함: ' + JSON.stringify(m));
+    // file: data/files/<slug>/ 안 파일 이름이면 드라이브 대신 서가에서 받는다(2026-11-25). 그때는 받는 쪽(src/material.html)을 만든다
+    if (m.file && !fs.existsSync(P('data', 'files', site.slug, m.file))) throw new Error('수업 자료 파일이 없음: data/files/' + site.slug + '/' + m.file);
+    if ((!m.file && !/^https:\/\//.test(m.href || '')) || !p || /[.]{2}|[?#]/.test(p)) throw new Error('수업 자료 주소가 이상함: ' + JSON.stringify(m));
     return { ...m, path: p, label: m.label || '수업 자료 받기' };
   });
   const matOf = b => mats.find(m => m.book === b.isbn || m.book === b.id) || null;
@@ -355,6 +357,24 @@ for (const site of sites) {
   for (const m of mats) {
     const b = list.find(x => x.isbn === m.book || x.id === m.book), d = path.join(out, ...m.path.split('/'));
     fs.mkdirSync(d, { recursive: true });
+    if (m.file) { // 서가에 올린 파일: 바로 넘기지 않고 받는 쪽(미리보기·내려받기 단추·앱 안 브라우저 안내)을 둔다
+      const up = '../'.repeat(m.path.split('/').length), fileUrl = up + 'files/' + encodeURIComponent(m.file);
+      const kb = fs.statSync(P('data', 'files', site.slug, m.file)).size / 1024;
+      const prev = (m.previews || []).map((f, i) => { if (!fs.existsSync(P('data', 'files', site.slug, f))) throw new Error('미리보기 그림이 없음: ' + f); return `<li><img src="${up}files/${encodeURIComponent(f)}" alt="${i + 1}쪽 미리보기" loading="lazy" width="520" height="736"><span>${esc((m.pageNames || [])[i] || (i + 1) + '쪽')}</span></li>`; }).join('');
+      fs.writeFileSync(path.join(d, 'index.html'), noPh(fs.readFileSync(P('src', 'material.html'), 'utf8')
+        .replaceAll('{{UP}}', up)
+        .replace('{{TITLE}}', () => `${esc(b.title)} ${esc(m.title || '수업 활동지')} · 부부작당`)
+        .replace('{{OG}}', () => ogTags({ type: 'website', title: `${b.title} ${m.title || '수업 활동지'}`, desc: m.note || '', pagePath: encodeURI(m.path) + '/', img: keyOf(b) + '.jpg' }))
+        .replaceAll('{{BOOK}}', esc(b.title)).replace('{{LABEL}}', () => esc(m.title || '수업 활동지'))
+        .replace('{{COVER}}', () => `${up}covers/${b.id}.webp?v=${VER}`)
+        .replace('{{META}}', () => esc(m.meta || ''))
+        .replaceAll('{{FILE}}', fileUrl).replace('{{FILENAME}}', () => esc(m.file))
+        .replace('{{SIZE}}', () => 'PDF · ' + (kb > 1024 ? (kb / 1024).toFixed(1) + 'MB' : Math.round(kb) + 'KB'))
+        .replace('{{PREVIEWS}}', () => prev ? `<h2>미리보기</h2><ul class="pages">${prev}</ul>` : '')
+        .replace('{{NOTE}}', () => esc(m.note || ''))
+        .replace('{{BOOKHREF}}', () => up + keyOf(b) + '/')));
+      continue;
+    }
     fs.writeFileSync(path.join(d, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer-when-downgrade"><meta http-equiv="refresh" content="3;url=${esc(m.href)}"><title>${esc(b.title)} 수업 자료 · ${esc(site.title)}</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#555;background:#fff}@media (prefers-color-scheme:dark){body{background:#1b1d1c;color:#bbb}}a{color:inherit}</style></head><body><p>수업 자료로 가는 중… <a href="${esc(m.href)}">바로 가기</a></p><script>(function(){var u=${safeJson(m.href)},g=function(){location.replace(u)};if(document.readyState==='complete')setTimeout(g,350);else addEventListener('load',function(){setTimeout(g,350)});setTimeout(g,1500)})()</script></body></html>`);
   }
   // 검색엔진에 알리는 파일: sitemap.xml(첫 화면 + 책 주소 전부), robots.txt, 없는 주소 화면 404.html

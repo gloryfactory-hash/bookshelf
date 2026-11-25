@@ -26,7 +26,7 @@
   ],
   "materials": [
     { "book": "9791168418042", "path": "수업/팩폭러", "href": "https://drive.google.com/drive/folders/1UDvTY5_oyriOhy4kpAflKkGm6IhIBDfx", "label": "수업 영상·활동지 받기", "note": "강연·수업 영상 6개, 선생님 안내문, 독서 후 활동지(A4 4쪽). 학교·도서관에서 자유롭게 쓰셔도 돼요." },
-    { "book": "9788966074877", "path": "수업/탈탈탈노트", "href": "https://limjh.kr/files/%ED%83%88%ED%83%88%ED%83%88%EB%85%B8%ED%8A%B8_%EB%8F%85%EC%84%9C%ED%99%9C%EB%8F%99%EC%A7%80.pdf", "label": "활동지 받기", "note": "선생님 안내문이 함께 든 독서 활동지(A4 4쪽, 2차시). 학교·도서관에서 자유롭게 쓰셔도 돼요." },
+    { "book": "9788966074877", "path": "수업/탈탈탈노트", "file": "탈탈탈노트_독서활동지.pdf", "title": "독서 활동지", "meta": "A4 4쪽 · 2차시(40분×2) · 초등 3학년 이상", "previews": ["탈탈탈노트_독서활동지-1.webp", "탈탈탈노트_독서활동지-2.webp", "탈탈탈노트_독서활동지-3.webp", "탈탈탈노트_독서활동지-4.webp"], "pageNames": ["1차시 · 읽기 전", "2차시 · 다 읽은 뒤", "선생님 안내", "교실 노트 쪽지"], "label": "활동지 받기", "note": "선생님 안내문이 함께 든 독서 활동지(A4 4쪽, 2차시). 학교·도서관에서 자유롭게 쓰셔도 돼요." },
     { "book": "9788911732012", "path": "수업/무엇이든", "href": "https://drive.google.com/drive/folders/1HlE4FQslaqYo3lhGEYadK1GzdAvLIvHz", "label": "수업 영상·활동지 받기", "note": "강연·수업 영상 7개, 선생님 안내문, 독서 후 활동지(A4 4쪽). 학교·도서관에서 자유롭게 쓰셔도 돼요." }
   ],
   "ig": {

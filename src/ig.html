@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>부부작당 책 소개 · 인스타그램에서 오신 분께</title>
+{{OG}}
+<meta name="description" content="부부작당 인스타그램에서 소개한 책과 수업 활동지, 임지형·김민성 작가의 책을 한곳에 모았어요.">
+<style>
+/* 인스타 프로필 링크 쪽 (2026-11-25, 서가 회의록 '인스타 프로필 링크 회의'). build.js가 sites/<slug>.json의 ig로 채운다.
+   색·글꼴은 새 책 소식 쪽(news.html)과 같은 집안: 페이퍼로지, 이름표 색(주황 임지형 / 초록 김민성), 크림 바탕 없음 */
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-5Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Paperozi';src:url('../assets/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900;font-display:swap}
+:root{
+  --paper:#EDF0EE; --sheet:#FFFFFF; --ink:#1E2421; --muted:#5E6661; --hair:rgba(30,36,33,.14);
+  --orange:#e3a03e; --orange-on:#3a2206; --orange-deep:#9c5a26; --green:#2d8a50; --green-on:#ffffff; /* 2026-11-21 초록 면 바뀜(_공용에셋/디자인토큰/부부작당_테마.md) */ --green-deep:#2f6e4c;
+  --chip:rgba(227,160,62,.14); --step:color-mix(in srgb,#9c5a26 84%,#000); --shadow:40,48,44;
+  --fs-1:12px; --fs-2:14px; --fs-3:16.5px; --fs-4:22px; --fs-5:34px;
+  --sans:'Paperozi','Pretendard',system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --hair:rgba(233,236,233,.16); --shadow:0,0,0;
+  --orange-deep:#E3A03E; --green-deep:#86C6A2; --chip:rgba(227,160,62,.16); --step:#f0b85e; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --hair:rgba(233,236,233,.16); --shadow:0,0,0;
+  --orange-deep:#E3A03E; --green-deep:#86C6A2; --chip:rgba(227,160,62,.16); --step:#f0b85e; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:500;-webkit-font-smoothing:antialiased;word-break:keep-all;line-height:1.5}
+a{color:inherit}
+img{display:block}
+:focus-visible{outline:2px solid var(--orange-deep);outline-offset:3px}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px calc(40px + env(safe-area-inset-bottom))}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 0 0;font-size:var(--fs-2);font-weight:700}
+.brand{display:inline-flex;gap:6px;align-items:center}
+.brand i{font-style:normal;background:var(--orange);color:var(--orange-on);padding:3px 10px 4px;border-radius:999px}
+.brand i+i{background:var(--green);color:var(--green-on)}
+.top a{color:var(--muted);text-decoration:none}
+@media (hover:hover){.top a:hover{color:var(--ink);text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:4px}}
+
+h1{font-size:var(--fs-5);font-weight:900;line-height:1.2;margin:28px 0 10px;letter-spacing:0}
+.lead{font-size:var(--fs-3);color:var(--muted);margin:0 0 28px}
+
+h2{font-size:var(--fs-2);font-weight:700;color:var(--muted);margin:36px 0 12px;display:flex;align-items:center;gap:8px}
+h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--orange)}
+h2 .dot.km{background:var(--green)}
+
+/* 지금 소개하는 책 */
+.now{background:var(--sheet);border-radius:14px;padding:18px;box-shadow:0 1px 0 var(--hair),0 14px 30px -18px rgba(var(--shadow),.45)}
+.now+.now{margin-top:14px}
+.nh{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:start}
+.nh img{width:112px;height:auto;border-radius:3px;box-shadow:0 10px 20px -10px rgba(var(--shadow),.55)}
+.nt{font-size:var(--fs-4);font-weight:900;line-height:1.25;margin:2px 0 6px}
+.nw{font-size:var(--fs-2);color:var(--muted);margin:0 0 8px}
+.nn{font-size:var(--fs-3);margin:0}
+.acts{display:grid;gap:8px;margin-top:16px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:12px 16px;border-radius:8px;text-decoration:none;font-weight:700;font-size:var(--fs-3);transition:background-color .2s,border-color .2s,color .2s}
+/* 채운 단추는 채널 꿀색 면 + 면 위 글자(2026-11-25 사용자 "꿀색으로". 꿀 위 흰 글자는 쓰지 않음, 대비 6.6) */
+.btn.fill{background:var(--orange);color:var(--orange-on)}
+.btn.line{border:1.5px solid var(--hair);color:var(--ink)}
+.btn small{font-size:var(--fs-2);font-weight:500;opacity:.85}
+@media (hover:hover){.btn.fill:hover{background:color-mix(in srgb,var(--orange) 86%,#000)}.btn.line:hover{border-color:var(--orange-deep);color:var(--orange-deep);background:var(--chip)}}
+.btn.line:active{background:var(--chip)}
+.btn.fill:active{background:color-mix(in srgb,var(--orange) 86%,#000)}
+.shops{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--hair);border-radius:8px;overflow:hidden}
+.shops a{min-height:48px;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:var(--fs-2);font-weight:700}
+.shops a+a{border-left:1.5px solid var(--hair)}
+@media (hover:hover){.shops a:hover{color:var(--orange-deep);background:var(--chip)}}
+.shops a:active{background:var(--chip)}
+
+/* 지난번에 소개한 책 */
+.list{list-style:none;margin:0;padding:0;background:var(--sheet);border-radius:14px;overflow:hidden}
+.list li+li{border-top:1px solid var(--hair)}
+.row{display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;padding:12px 16px;text-decoration:none;min-height:64px}
+.row img{width:56px;height:auto;border-radius:2px}
+.row b{display:block;font-size:var(--fs-3);font-weight:700;line-height:1.35}
+.row span{display:block;font-size:var(--fs-2);color:var(--muted);margin-top:2px}
+.row svg{color:var(--muted)}
+@media (hover:hover){.row:hover b{text-decoration:underline;text-decoration-color:var(--orange);text-underline-offset:4px}}
+.row:active{background:var(--chip)}
+
+/* 임지형의 책 */
+.shelf{background:var(--sheet);border-radius:14px;padding:18px}
+.shelf p{margin:0 0 14px;font-size:var(--fs-3)}
+.grades{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.grades a{min-height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border:1.5px solid var(--hair);border-radius:8px;text-decoration:none;font-weight:700;font-size:var(--fs-3)}
+.grades a span{font-size:var(--fs-2);font-weight:500;color:var(--muted)}
+@media (hover:hover){.grades a:hover{border-color:var(--orange-deep);color:var(--orange-deep);background:var(--chip)}}
+.grades a:active{background:var(--chip)}
+
+/* 김민성의 책: 옆으로 넘기는 한 줄 */
+.kmrow{display:grid;grid-auto-flow:column;grid-auto-columns:38%;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;padding:2px 16px 10px;margin:0 -16px;scrollbar-width:none}
+.kmrow::-webkit-scrollbar{display:none}
+.kmrow a{scroll-snap-align:start;text-decoration:none}
+.kmrow img{width:100%;height:auto;border-radius:3px;box-shadow:0 10px 20px -12px rgba(var(--shadow),.6)}
+.kmrow b{display:block;font-size:var(--fs-3);font-weight:700;line-height:1.35;margin-top:10px}
+.kmrow span{display:block;font-size:var(--fs-2);color:var(--muted);margin-top:2px}
+@media (hover:hover){.kmrow a:hover b{text-decoration:underline;text-decoration-color:var(--green);text-underline-offset:4px}}
+.kmnote{font-size:var(--fs-2);color:var(--muted);margin:6px 0 0}
+
+/* 맨 아래 */
+.foot{display:grid;gap:8px;margin-top:36px}
+.sign{font-size:var(--fs-2);color:var(--muted);text-align:center;margin:28px 0 0}
+
+@media (min-width:600px){.kmrow{grid-auto-columns:30%;margin:0;padding:2px 0 10px;scroll-padding-inline:0}.nh{grid-template-columns:132px 1fr}.nh img{width:132px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.kmrow{scroll-snap-type:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <span class="brand" aria-label="부부작당 임지형 김민성"><i>임지형</i><i>김민성</i></span>
+  <a href="../">임지형 서가 →</a>
+</header>
+
+<h1>부부작당이<br>소개한 책</h1>
+<p class="lead">인스타그램 카드뉴스와 영상에서 소개한 책을 모았어요. 수업 활동지도 여기서 바로 받아요.</p>
+
+<h2><span class="dot"></span>지금 소개하는 책</h2>
+{{NOW}}
+{{PAST}}
+<h2><span class="dot"></span>{{LJ_NAME}}의 책</h2>
+{{LJ}}
+{{OTHER}}
+<nav class="foot" aria-label="부부작당 더 보기">
+  <a class="btn line" href="{{YOUTUBE}}">부부작당 유튜브 <small>책 소개 영상</small></a>
+  <a class="btn line" href="../news/">새 책 소식 받기 <small>신간이 나올 때만 메일로</small></a>
+</nav>
+<p class="sign">부부작당 · 임지형 김민성</p>
+</div>
+</body>
+</html>

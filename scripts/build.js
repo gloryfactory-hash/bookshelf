@@ -337,7 +337,10 @@ for (const site of sites) {
   }
   // 서점으로 거쳐 가는 쪽 (2026-11-16): go/<서점>/<ISBN>/. 방문 통계(Cloudflare Web Analytics)가 페이지 보기로 세어
   // '어느 책에서 어느 서점으로 몇 번 나갔는지'를 볼 수 있게 한다. 통계 스크립트가 보낼 틈을 주려고 load 뒤 잠깐 기다렸다 넘긴다.
-  for (const b of list) for (const k of ['yes24', 'kyobo', 'aladin']) {
+  // 인스타 입구 쪽(ig/, 아래)에 나오는 다른 작가 책(이 서가에 없는 단독 저서)도 서점 넘김 쪽을 만들어 통계에 잡히게 한다
+  const igOther = site.ig && site.ig.other ? books.filter(b => b.authors.includes(site.ig.other)).sort(newestFirst) : [];
+  const igExtra = igOther.filter(b => !list.includes(b));
+  for (const b of [...list, ...igExtra]) for (const k of ['yes24', 'kyobo', 'aladin']) {
     const u = b.links[k]; if (!u || !/^https:\/\//.test(u)) continue;
     const d = path.join(out, 'go', k, String(keyOf(b))); fs.mkdirSync(d, { recursive: true });
     fs.writeFileSync(path.join(d, 'index.html'), `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer-when-downgrade"><meta http-equiv="refresh" content="3;url=${esc(u)}"><title>${esc(b.title)} · 서점으로 가는 중</title><style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#555;background:#fff}@media (prefers-color-scheme:dark){body{background:#1b1d1c;color:#bbb}}a{color:inherit}</style></head><body><p>서점으로 가는 중… <a href="${esc(u)}">바로 가기</a></p><script>(function(){var u=${safeJson(u)},g=function(){location.replace(u)};if(document.readyState==='complete')setTimeout(g,350);else addEventListener('load',function(){setTimeout(g,350)});setTimeout(g,1500)})()</script></body></html>`);
@@ -374,6 +377,39 @@ for (const site of sites) {
       .replaceAll('{{FROM}}', esc(CH.newsFrom || CH.name))
       .replace('{{COVERS}}', () => order.map(b => `<figure><img src="../covers/${b.id}.webp?v=${VER}" alt="${esc(b.title)} 표지"><figcaption>${esc(b.title)}</figcaption></figure>`).join(''))));
   }
+  // 인스타 프로필 링크 쪽 (2026-11-25, 회의록 '인스타 프로필 링크 회의'): <서가>/ig/. sites/<slug>.json의
+  //   ig: { now: [{ book, note }] 지금 소개 중, past: [ISBN…] 지난 소개(최근 것 앞), other: '김민성'(그 작가 책 줄) }
+  //   새 게시물을 올리면 now 맨 앞에 더하고, 내려간 책은 past 맨 앞으로 옮긴다. 프로필 링크는 limjh.kr/ig/ 그대로.
+  if (site.ig) {
+    const find = (id, what) => { const b = books.find(x => x.isbn === id || x.id === id); if (!b) throw new Error(`ig ${what}의 책을 못 찾음: ${id}`); return b; };
+    const href = b => { const l = (site.landings || []).find(m => m.book === b.isbn || m.book === b.id); return list.includes(b) ? '../' + (l ? l.path + '/' : keyOf(b) + '/') : null; };
+    const shopName = { yes24: 'YES24', kyobo: '교보문고', aladin: '알라딘' };
+    const shops = b => Object.keys(shopName).filter(k => /^https:\/\//.test(b.links[k] || '')).map(k => `<a href="../go/${k}/${esc(keyOf(b))}/">${shopName[k]}</a>`).join('');
+    const arrow = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    for (const b of igExtra) { const c = await cover(b); fs.copyFileSync(c.L, path.join(out, 'covers', b.id + '.webp')); fs.copyFileSync(c.S, path.join(out, 'covers', b.id + '-s.webp')); }
+    const nowHtml = (site.ig.now || []).map(n => {
+      const b = find(n.book, 'now'), m = matOf(b), h = href(b);
+      return `<article class="now"><div class="nh"><img src="../covers/${b.id}.webp?v=${VER}" alt="${esc(b.title)} 표지" width="112"><div><div class="nt">${esc(b.title)}</div><p class="nw">${esc(b.authors.join(' · '))} · ${esc(b.pub)}</p><p class="nn">${esc(n.note || b.one)}</p></div></div>` +
+        `<div class="acts">${m ? `<a class="btn fill" href="../${encodeURI(m.path)}/">수업 활동지 받기 <small>PDF · 누구나</small></a>` : ''}${h ? `<a class="btn ${m ? 'line' : 'fill'}" href="${esc(h)}">책 자세히 보기</a>` : ''}<nav class="shops" aria-label="${esc(b.title)} 서점">${shops(b)}</nav></div></article>`;
+    }).join('\n');
+    const past = (site.ig.past || []).map(id => find(id, 'past'));
+    const pastHtml = past.length ? `<h2><span class="dot"></span>지난번에 소개한 책</h2><ul class="list">` + past.map(b => `<li><a class="row" href="${esc(href(b) || '../go/yes24/' + keyOf(b) + '/')}"><img src="../covers/${b.id}-s.webp?v=${VER}" alt="" width="56"><div><b>${esc(b.title)}</b><span>${esc(b.one)}</span></div>${arrow}</a></li>`).join('') + '</ul>' : '';
+    const grades = pages.filter(pg => pg.k.startsWith('g-'));
+    const ljHtml = `<div class="shelf"><p>동화·청소년소설 ${list.length}권을 학년과 주제로 찾아볼 수 있어요.</p><div class="grades">` +
+      grades.map(pg => `<a href="../${encodeURI(pg.p)}/">${esc((vocab.targets.find(t => 'g-' + t.name === pg.k) || {}).short || pg.h)}<span>${pg.books.length}권</span></a>`).join('') +
+      `</div><a class="btn fill" href="../">서가 전체 보기</a></div>`;
+    const otherHtml = igOther.length ? `<h2><span class="dot km"></span>${esc(site.ig.other)}의 책</h2><div class="kmrow">` +
+      igOther.map(b => `<a href="${esc(href(b) || '../go/yes24/' + keyOf(b) + '/')}"><img src="../covers/${b.id}-s.webp?v=${VER}" alt="" loading="lazy"><b>${esc(b.title)}</b><span>${b.authors.length > 1 ? '함께 쓴 책' : esc(b.tgt === '청소년' ? '청소년' : b.tgt === '일반' ? '어른' : '초등 ' + b.tgt)}</span></a>`).join('') +
+      `</div><p class="kmnote">함께 쓴 책은 서가로, 혼자 쓴 책은 YES24로 가요.</p>` : '';
+    fs.mkdirSync(path.join(out, 'ig'), { recursive: true });
+    fs.writeFileSync(path.join(out, 'ig', 'index.html'), noPh(fs.readFileSync(P('src', 'ig.html'), 'utf8')
+      .replace('{{OG}}', () => URL0 ? `<link rel="canonical" href="${esc(URL0)}ig/">\n<meta property="og:title" content="부부작당이 소개한 책">\n<meta property="og:url" content="${esc(URL0)}ig/">` : '')
+      .replace('{{NOW}}', () => nowHtml).replace('{{PAST}}', () => pastHtml)
+      .replace('{{LJ_NAME}}', () => esc(site.author)).replace('{{LJ}}', () => ljHtml).replace('{{OTHER}}', () => otherHtml)
+      .replace('{{YOUTUBE}}', () => esc(CH.youtube))));
+  }
+  // 수업 자료 파일 (2026-11-25): data/files/<slug>/ → <서가>/files/ (활동지 PDF 등, 누구나 받게. materials의 href가 가리킨다)
+  { const fsrc = P('data', 'files', site.slug); if (fs.existsSync(fsrc)) fs.cpSync(fsrc, path.join(out, 'files'), { recursive: true }); }
   // 방명록 (2026-11-19, 회의록). sites/<slug>.json의 guestbook: { turnstile: 사이트 키 }. 글은 functions/api/guestbook이 D1에 둔다
   if (site.guestbook) {
     fs.mkdirSync(path.join(out, 'guestbook', 'admin'), { recursive: true });

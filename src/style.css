@@ -11,7 +11,7 @@
 :root{
   --paper:#EDF0EE; --sheet:#F5F7F5; --ink:#1E2421; --muted:#5E6661; --accent:#9c5a26; --rule:rgba(30,36,33,.85); --hair:rgba(30,36,33,.16);
   --shadow:40,48,44; --ringfill:rgba(237,240,238,.85); --chip:rgba(227,160,62,.16);
-  --orange:#e3a03e; --orange-deep:#9c5a26; --orange-on:#3a2206; --green:#3fae78; --green-deep:#2f6e4c; --green-on:#0d2e1d;
+  --orange:#e3a03e; --orange-deep:#9c5a26; --orange-on:#3a2206; --green:#2d8a50; --green-deep:#2f6e4c; --green-on:#ffffff; /* 2026-11-21 초록 면 바뀜(유튜브 배너·로고, _공용에셋/디자인토큰/부부작당_테마.md) */
   --me:var(--orange); --me-deep:var(--orange-deep); --me-on:var(--orange-on); --kan-stroke:rgba(227,160,62,.6);
   --ease:cubic-bezier(.2,.8,.2,1);
   --step:color-mix(in srgb,var(--accent) 84%,#000); /* 채운 단추에 마우스를 올렸을 때 한 단계 진한 색 */
@@ -29,7 +29,7 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-:root[data-me="green"]{--step:color-mix(in srgb,#2f6e4c 84%,#000); --accent:#2f6e4c; --chip:rgba(63,174,120,.14); --me:var(--green); --me-deep:var(--green-deep); --me-on:var(--green-on); --kan-stroke:rgba(63,174,120,.5)}
+:root[data-me="green"]{--step:color-mix(in srgb,#2f6e4c 84%,#000); --accent:#2f6e4c; --chip:rgba(45,138,80,.14); --me:var(--green); --me-deep:var(--green-deep); --me-on:var(--green-on); --kan-stroke:rgba(45,138,80,.5)}
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --paper:#171B19; --sheet:#1F2522; --ink:#E9ECE9; --muted:#A2AAA5; --accent:#E3A03E; --rule:rgba(233,236,233,.8); --hair:rgba(233,236,233,.16);

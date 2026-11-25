@@ -368,6 +368,7 @@ for (const site of sites) {
         .replaceAll('{{BOOK}}', esc(b.title)).replace('{{LABEL}}', () => esc(m.title || '수업 활동지'))
         .replace('{{COVER}}', () => `${up}covers/${b.id}.webp?v=${VER}`)
         .replace('{{META}}', () => esc(m.meta || ''))
+        .replace('{{DLFILE}}', () => /\.pdf$/i.test(m.file) ? up + 'files/dl/' + encodeURIComponent(m.file) : fileUrl)
         .replaceAll('{{FILE}}', fileUrl).replace('{{FILENAME}}', () => esc(m.file))
         .replace('{{SIZE}}', () => 'PDF · ' + (kb > 1024 ? (kb / 1024).toFixed(1) + 'MB' : Math.round(kb) + 'KB'))
         .replace('{{PREVIEWS}}', () => prev ? `<h2>미리보기</h2><ul class="pages">${prev}</ul>` : '')
@@ -429,7 +430,18 @@ for (const site of sites) {
       .replace('{{YOUTUBE}}', () => esc(CH.youtube))));
   }
   // 수업 자료 파일 (2026-11-25): data/files/<slug>/ → <서가>/files/ (활동지 PDF 등, 누구나 받게. materials의 href가 가리킨다)
-  { const fsrc = P('data', 'files', site.slug); if (fs.existsSync(fsrc)) fs.cpSync(fsrc, path.join(out, 'files'), { recursive: true }); }
+  { const fsrc = P('data', 'files', site.slug); if (fs.existsSync(fsrc)) {
+    fs.cpSync(fsrc, path.join(out, 'files'), { recursive: true });
+    // 내려받기 단추용 사본 files/dl/ (2026-11-25): download 속성만으로는 아이폰·앱 안 브라우저가 문서를 그냥 연다.
+    // 서버가 'attachment'로 보내야 저장 창이 뜬다(_headers). '열어 보기'는 원래 files/ 주소를 그대로 쓴다
+    const pdfs = fs.readdirSync(fsrc).filter(f => /\.pdf$/i.test(f));
+    if (pdfs.length) {
+      fs.mkdirSync(path.join(out, 'files', 'dl'), { recursive: true });
+      for (const f of pdfs) fs.copyFileSync(path.join(fsrc, f), path.join(out, 'files', 'dl', f));
+      const hp = path.join(out, '_headers');
+      fs.appendFileSync(hp, (fs.existsSync(hp) ? '\n' : '') + '/files/dl/*\n  Content-Disposition: attachment\n  Content-Type: application/octet-stream\n');
+    }
+  } }
   // 방명록 (2026-11-19, 회의록). sites/<slug>.json의 guestbook: { turnstile: 사이트 키 }. 글은 functions/api/guestbook이 D1에 둔다
   if (site.guestbook) {
     fs.mkdirSync(path.join(out, 'guestbook', 'admin'), { recursive: true });
